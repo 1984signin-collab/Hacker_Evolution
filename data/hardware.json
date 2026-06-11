@@ -1,0 +1,7 @@
+[
+  ["Firewall","firewall","Doubles trace time",500,2.2,10],
+  ["Modem","modem","Doubles transfer speed",400,2.0,10],
+  ["CPU","cpu","Doubles crack/decrypt speed",800,2.5,10],
+  ["Memory","memory","Increases storage",300,2.0,10],
+  ["Neural Adapter","neural","Doubles ALL performance",5000,3.0,3]
+]
