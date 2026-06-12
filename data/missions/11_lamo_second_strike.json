@@ -1,0 +1,10 @@
+{
+  "id": "lamo_second_strike",
+  "lvl": 11,
+  "name": "Lamo's Second Strike",
+  "target": null,
+  "desc": "Adrian Lamo didn't stop at the New York Times. He also breached Yahoo!, Microsoft, and WorldCom. Follow in his footsteps — crack a corporate news server and upload a press release exposing Nexus's cover-up.",
+  "obj": "Crack a media server and UPLOAD a .txt file containing the truth",
+  "reward": 10000,
+  "obj_type": "lamp_upload"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "stolls_trap",
+  "lvl": 13,
+  "name": "Stoll's Trap",
+  "target": null,
+  "desc": "Clifford Stoll tracked a hacker through a 75-cent accounting discrepancy. The hacker was after military secrets. A government .mil server has a honeypot trap — trigger it by transferring funds, but cover your tracks with a long bounce chain.",
+  "obj": "Build a 6-hop bounce chain and transfer $15,000 from a .mil server",
+  "reward": 20000,
+  "obj_type": "levin_heist",
+  "obj_count": 6
+}

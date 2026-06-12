@@ -1,0 +1,10 @@
+{
+  "id": "mentors_code",
+  "lvl": 12,
+  "name": "The Mentor's Code",
+  "target": null,
+  "desc": "The Mentor wrote the Hacker Manifesto in 1986. His words inspired generations. A fragment of the original manuscript is hidden on a secure server. Find it and combine it with a decryption key to reveal the full text.",
+  "obj": "Use COMBINE on two files to reconstruct the Hacker Manifesto",
+  "reward": 14000,
+  "obj_type": "combine"
+}

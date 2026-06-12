@@ -1,0 +1,11 @@
+{
+  "id": "final_breach",
+  "lvl": 15,
+  "name": "The Final Breach",
+  "target": null,
+  "desc": "The Nexus mainframe has a dead man's switch. If Overwatch detects coordinated attacks across government networks, it triggers a purge of all evidence. You need perfect synchronization: crack multiple government servers simultaneously through bounce chains, then launch the final exploit.",
+  "obj": "Crack 3 government servers with 10 total bounce hops",
+  "reward": 50000,
+  "obj_type": "anon_rising",
+  "obj_count": 10
+}

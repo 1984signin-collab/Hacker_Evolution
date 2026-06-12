@@ -1,0 +1,11 @@
+{
+  "id": "zero_day_market",
+  "lvl": 14,
+  "name": "Zero Day Market",
+  "target": null,
+  "desc": "Zero-day exploits are the currency of the dark web. Nexus Corporation has been stockpiling vulnerabilities for years. Infiltrate their supply chain — download exploit source code from 8 different corporate servers before they patch the holes.",
+  "obj": "Download files from 8 different servers",
+  "reward": 30000,
+  "obj_type": "download_multi",
+  "obj_count": 8
+}
