@@ -28,6 +28,9 @@ Your mission: breach Nexus's network, steal the truth, and make a final choice t
 | **Network Simulation** | Servers, firewalls, ports, real-time connections |
 | **Hacking System** | Scan, crack, connect, download, upload, exec |
 | **Economy** | Earn credits by selling data, buy upgrades |
+| **Darknet Market** | Buy named exploits (SQL injector, brute-force tool, stealth kit, etc.) |
+| **Sentinel AI** | Adaptive adversary with DORMANT → ANALYZING → ACTIVE states |
+| **Dynamic World** | Random [SYSTEM]/[NET]/[SEC] events while you play |
 | **Dynamic Story** | Unfolds episodically via the STORY command |
 | **Hardware System** | RAM, CPU, personal firewall — upgrade your rig |
 | **Modular Content** | Missions and emails are individual .json files — add your own without touching code |
@@ -39,20 +42,118 @@ Your mission: breach Nexus's network, steal the truth, and make a final choice t
 | `HELP` | Show all available commands |
 | `SCAN` | Scan local network for active servers |
 | `SCANPORTS [IP]` | Scan a server's open ports |
-| `CONNECT [IP]` | Connect to a remote server |
-| `CRACK` | Crack the firewall of the connected server |
+| `CONNECT [IP] [port]` | Connect to a remote server |
+| `CRACK [IP] [port]` | Brute-force a password on target port |
+| `DECRYPT [IP]` | Decrypt a server's encryption key |
+| `LOGIN [IP] [password]` | Log into a server with known credentials |
 | `LS` | List files on the current server |
 | `CAT [file]` | Read a file's contents |
 | `DOWNLOAD [file]` | Download a file from the server |
 | `UPLOAD [file]` | Upload a file to the server |
 | `EXEC [file]` | Execute a file on the server |
 | `SERVERS` | List all servers on the network |
-| `CONFIG` | Show your system stats |
+| `ROUTE` | Show the network topology graph |
+| `SCHEMATIC` | Show the network grid |
+| `DARKNET` | Open the exploit shop (buy tools and worms) |
+| `MARKET` | Open the black market (buy burner phones, scanners) |
+| `SKILLS` | Open the skill tree (stealth, brute-force, phish) |
+| `CONFIG` | Show your system stats and settings |
+| `UPGRADE` | Open the hardware upgrade shop |
 | `MONEY` | Show your credit balance |
 | `STORY` | Reveal the plot episode by episode |
+| `MISSIONS` | Show active missions |
+| `NEWMISSION` | Generate new contracts |
 | `LOGOUT` | Disconnect from the current server |
-| `TRANSFER [amount] [IP]` | Transfer credits to another hacker |
+| `TRANSFER [amount]` | Transfer money from the connected server |
+| `BOUNCE [host]` | Add a bounce hop to hide your trace |
+| `BOUNCEINFO` | Show current bounce chain |
+| `BOUNCEHELP` | Bounce usage guide |
+| `KILLTRACE` | Pay $500 to reduce trace by 10% |
+| `DELETELOGS` | Delete server access logs |
+| `PING [host]` | Test connection to a host |
+| `TRACEROUTE [host]` | Trace the route to a host |
+| `COMBINE [f1] [f2]` | Combine two files in the virus factory |
+| `CRYPTO` | Show crypto market |
+| `BUYCRYPTO [coin] [amt]` | Buy cryptocurrency |
+| `SELLCRYPTO [coin] [amt]` | Sell cryptocurrency |
+| `INTEL` | List stolen intelligence |
+| `SELLINTEL [id]` | Sell intel on the black market |
+| `STORY` | Hacker legend missions |
+| `EMAIL` | Read Darius emails |
+| `SWITCH` | Final endgame decision |
+| `VIEW` | 3D view of connected server |
+| `SKILLS` | Skill tree |
+| `STATS` | Show your statistics |
+| `ALIAS [name] [cmd]` | Create command alias |
+| `UNALIAS [name]` | Remove alias |
 | `CLEAR` | Clear the terminal |
+| `SOUND` | Toggle sound effects |
+| `GLITCH` | Trigger a glitch effect |
+
+---
+
+## 🕶️ Darknet Market
+
+Buy named exploits and tools with your hacking profits. Type `DARKNET` to open the shop.
+
+| Exploit | Effect |
+|---------|--------|
+| `SQL_Injector_v1.exe` | Instantly cracks a database server port |
+| `Brute_Force_Tool_v2.exe` | 3× crack speed on target |
+| `Packet_Sniffer_v3.exe` | Reveals all hidden neighbor connections |
+| `Decrypt_Booster_v1.exe` | Instantly decrypts a server key |
+| `Stealth_Kit_v2.exe` | −50% trace for 5 actions |
+| `Worm_Deluxe_v4.exe` | Auto-cracks all neighboring servers |
+| `Firewall_Bypass_v1.exe` | Suppresses Sentinel AI temporarily |
+| `Crypto_Miner_v3.exe` | +50% crypto trading profit |
+| `Trace_Killer_v1.exe` | Resets trace to 0% (one-time) |
+| `Scan_Probe_v5.exe` | Reveals every server on the network |
+
+Each exploit has a **level requirement** and a **cost**. Once purchased, the file is added to your local storage and can be executed with `EXEC`.
+
+---
+
+## 👻 Ghost in the Machine — Sentinel AI
+
+Sentinel is an adaptive adversary that reacts to your actions in real time. It's not a simple trace bar — it's a Finite State Machine that thinks.
+
+### FSM States
+
+```
+DORMANT ──(trace > 30%)──→ ANALYZING ──(trace > 60%)──→ ACTIVE
+   ↑                                                        │
+   └────────────── (trace < 15% for N ticks) ───────────────┘
+```
+
+- **DORMANT** — No threat detected. Normal operations.
+- **ANALYZING** — Yellow alerts. Trace signatures being scanned.
+  - Random `[SENTINEL]` log messages.
+- **ACTIVE** — Red alert! Countermeasures deployed:
+  - 🔒 **Close ports** — Sentinel closes randomly cracked ports on your current server.
+  - 🗑️ **Delete files** — Removes downloaded files from your local storage.
+  - 📈 **Amplify trace** — Increases trace level by 5–15%.
+
+### Countering Sentinel
+
+- **KILLTRACE** — Reduces trace level, helping you slip back to DORMANT.
+- **Firewall_Bypass_v1.exe** — Suppresses all Sentinel activity while active.
+- **Stay stealthy** — Keep trace below 30% and Sentinel won't wake up.
+
+> *The game becomes a chess match: predict Sentinel's moves, time your actions, and strike when it's dormant.*
+
+---
+
+## 📡 Random System Events
+
+While you work, the terminal feels alive. Every 20–60 seconds, random system messages appear:
+
+```
+[SYSTEM] Maintenance window: 5 minutes.
+[NET] Unusual traffic from IP 142.xx.xx.xx
+[SEC] Firewall signature updated. 12 new rules deployed.
+```
+
+These are purely atmospheric — but they create urgency, making you feel like the network is a living, breathing entity.
 
 ---
 
@@ -120,8 +221,11 @@ hacker-evolution/
 │   │   ├── 02_system_blueprint.json
 │   │   └── ...
 │   ├── servers.json            # 🌐 Server pool
+│   ├── exploits.json           # 🕶️ Darknet exploit definitions
 │   ├── gov_intel.json          # 🏛️ Government intel types
 │   └── hardware.json           # 🔧 Hardware shop items
+├── docs/                       # 📖 Documentation
+│   └── MODDING.md              # Modding API reference
 ├── scripts/
 │   └── capture_gif.py          # Gameplay GIF capture script
 ├── assets/
@@ -132,63 +236,54 @@ hacker-evolution/
 
 ## 🧩 Creating Content (Mod System)
 
-The game loads all missions and emails from individual `.json` files. **No Python code to touch.** Just drop a file in the right folder and it works.
+Full documentation: **📖 [docs/MODDING.md](docs/MODDING.md)**
 
-### 📜 Adding a Mission
+The game loads all missions, emails, and exploits from individual `.json` files. **No Python code to touch.** Just drop a file in the right folder and it works.
 
-Create a new file in `data/missions/` (e.g. `my_mission.json`):
+### Quick Examples
+
+**📜 Add a mission** — create `data/missions/my_mission.json`:
 
 ```json
 {
   "id": "my_custom_mission",
-  "lvl": 3,
   "name": "The Hidden Server",
-  "target": null,
-  "desc": "Rumors speak of a server no one has ever breached. Find it, crack it, and prove your worth.",
-  "obj": "Crack port 443 on a government server and download the file \"classified.db\"",
-  "reward": 2500,
+  "lvl": 3,
+  "desc": "Breach the rumored hidden server.",
   "obj_type": "download",
-  "obj_file": "classified.db"
+  "obj_file": "classified.db",
+  "reward": 2500
 }
 ```
 
-**Fields explained:**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique identifier for the mission |
-| `lvl` | number | Minimum player level to unlock |
-| `name` | string | Display name |
-| `desc` | string | Lore description |
-| `obj` | string | Objective text shown to the player |
-| `reward` | number | Money reward on completion |
-| `obj_type` | string | Trigger type (`download`, `bounce`, `login`, `combine`, `gsm_transfer`, `levin_heist`, `lamp_upload`, `mckinnon_intel`, `download_multi`, `anon_rising`, `hack`, `crack`, `transfer`, `intel`) |
-| `obj_file` | string | (optional) Required file for download missions |
-| `obj_count` | number | (optional) Required count for multi-step missions |
-
-### 📧 Adding an Email
-
-Create a new file in `data/emails/` (e.g. `04_hint.json`):
+**📧 Add an email** — create `data/emails/my_email.json`:
 
 ```json
 {
   "sub": "A Friendly Warning",
   "lvl": 4,
-  "body": "I've heard rumors that Nexus is stepping up their game.\nThey've deployed new intrusion detection systems.\nUpgrade your firewall before hitting the big targets.\n— Darius"
+  "body": "Nexus deployed new IDS systems.\nUpgrade your firewall.\n— Darius"
 }
 ```
 
-**Fields:**
+**🕶️ Add a Darknet exploit** — add an entry to `data/exploits.json`:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `sub` | string | Subject line |
-| `lvl` | number | Level at which the email becomes readable |
-| `body` | string | Email body text (use `\n` for line breaks) |
+```json
+{
+  "id": "my_radar",
+  "name": "Radar_Scan_v2.exe",
+  "desc": "Reveals all entry points on the network",
+  "cost": 1500,
+  "level": 2,
+  "type": "tool",
+  "effect": "global_reveal",
+  "content": "# Radar_Scan_v2 — network radar scan"
+}
+```
 
 ### 🧪 Validation
 
-The game **will not crash** if a JSON file has a syntax error. You'll see a friendly message in the terminal:
+The game **will not crash** if a JSON file has a syntax error. You'll see a friendly warning in the terminal:
 
 ```
 [ERROR] Data file 'my_mission.json' in data/missions/ is corrupt. Skipping.
@@ -198,14 +293,12 @@ Fix the file and restart the game.
 
 ### 🤝 How to Contribute
 
-> **Want to create content? Just add a `.json` file in `/data/missions/` or `/data/emails/` and submit a Pull Request!**
-
 1. Fork the repository
 2. Add your `.json` file(s) to the appropriate folder
 3. Test by running the game locally
 4. Submit a Pull Request
 
-Your mission could be part of the official game!
+Your mission, email, or exploit could be part of the official game!
 
 ---
 

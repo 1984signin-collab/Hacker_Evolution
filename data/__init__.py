@@ -73,3 +73,6 @@ DARIUS_EMAILS = _load_json_dir('emails')
 
 # ── Hardware shop ──
 HARDWARE = _load_json('hardware.json')
+
+# ── Darknet exploits ──
+EXPLOITS = _load_json('exploits.json')

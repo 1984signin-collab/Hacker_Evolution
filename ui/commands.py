@@ -10,7 +10,7 @@ from tkinter import messagebox
 
 from engine.config import Colors
 from engine.game import g
-from data import HARDWARE, STORY_MISSIONS, DARIUS_EMAILS
+from data import HARDWARE, STORY_MISSIONS, DARIUS_EMAILS, EXPLOITS
 from ui.rich_bridge import render_to_widget, make_table, make_panel
 from ui.lang import _, _fmt
 
@@ -73,6 +73,7 @@ def h_help(self, a, r):
         ('SELLCRYPTO <c> <n>', 'Sell crypto'),
         ('INTEL', 'Stolen intelligence list'),
         ('SELLINTEL <id>', 'Sell intel on black market'),
+        ('DARKNET', 'Darknet exploit shop'),
         ('MARKET', 'Black market'),
         ('STORY', 'Hacker legend missions'),
         ('EMAIL', 'Read Darius emails'),
@@ -1125,6 +1126,115 @@ def h_email(self, a, r):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# h_darknet — Darknet exploit shop
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def h_darknet(self, a, r):
+    """Open the Darknet shop to buy named exploits and tools."""
+    w = tk.Toplevel(self.root)
+    w.title(_('🕶 Darknet — Exploit Shop'))
+    w.geometry('650x520+380+150')
+    w.configure(bg=Colors.black)
+    w.resizable(False, False)
+
+    header = tk.Frame(w, bg=Colors.dark)
+    header.pack(fill=tk.X)
+    tk.Label(header, text=_('╔══ DARKNET EXPLOITS ══╗'), bg=Colors.dark,
+             fg=Colors.pink, font=('Consolas', 14, 'bold')).pack(pady=(10, 2))
+    tk.Label(header, text=_fmt('💰 ${:,}   |   Owned: {} exploits', g.money, len(g.exploits)),
+             bg=Colors.dark, fg=Colors.yellow, font=('Consolas', 11)).pack(pady=(0, 8))
+
+    canvas = tk.Canvas(w, bg=Colors.bg, highlightthickness=0)
+    scrollbar = tk.Scrollbar(w, orient=tk.VERTICAL, command=canvas.yview,
+                             bg=Colors.dark, troughcolor=Colors.black)
+    scroll_frame = tk.Frame(canvas, bg=Colors.bg)
+
+    scroll_frame.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox('all')))
+    canvas.create_window((0, 0), window=scroll_frame, anchor='nw')
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Populate exploit list
+    for ex in EXPLOITS:
+        owned = ex['id'] in g.exploits
+        affordable = g.money >= ex['cost']
+        level_ok = g.level >= ex.get('level', 1)
+
+        frame = tk.Frame(scroll_frame, bg=Colors.dark, relief=tk.RIDGE, bd=1,
+                         highlightbackground=Colors.pink if not owned else Colors.green,
+                         highlightthickness=1)
+        frame.pack(fill=tk.X, padx=10, pady=3)
+
+        # Name + level requirement
+        name_color = Colors.dim if owned else Colors.cyan
+        tk.Label(frame, text=ex['name'], bg=Colors.dark, fg=name_color,
+                 font=('Consolas', 11, 'bold')).pack(side=tk.LEFT, padx=8, pady=4)
+
+        # Level badge
+        lvl_tag = f'LVL {ex["level"]}'
+        lvl_color = Colors.green if level_ok else Colors.red
+        tk.Label(frame, text=lvl_tag, bg=Colors.dark, fg=lvl_color,
+                 font=('Consolas', 8)).pack(side=tk.LEFT, padx=4)
+
+        # Price or OWNED
+        if owned:
+            tk.Label(frame, text=_('OWNED ✓'), bg=Colors.dark, fg=Colors.green,
+                     font=('Consolas', 10, 'bold')).pack(side=tk.RIGHT, padx=8)
+        else:
+            tk.Label(frame, text=f'${ex["cost"]:,}', bg=Colors.dark, fg=Colors.yellow,
+                     font=('Consolas', 10, 'bold')).pack(side=tk.RIGHT, padx=5)
+
+            buy_btn = tk.Button(frame, text=_('BUY'),
+                                bg=Colors.dark, fg=Colors.pink,
+                                activebackground='#660033',
+                                font=('Consolas', 9, 'bold'),
+                                relief=tk.RAISED, bd=1, padx=8)
+            buy_btn.pack(side=tk.RIGHT, padx=3)
+
+            if affordable and level_ok:
+                buy_btn.config(command=lambda eid=ex['id']: self._buy_darknet(eid, w))
+            else:
+                reason = _('Need LVL {}') if not level_ok else _('Need ${}')
+                buy_btn.config(state=tk.DISABLED, fg=Colors.dim,
+                               text=reason.format(ex['level'] if not level_ok else ex['cost']))
+
+        # Description
+        tk.Label(scroll_frame, text=_(ex['desc']), bg=Colors.bg, fg=Colors.dim,
+                 font=('Consolas', 8)).pack(anchor='w', padx=18)
+
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(5, 0), pady=5)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=5)
+
+    btn_frame = tk.Frame(w, bg=Colors.black)
+    btn_frame.pack(fill=tk.X, pady=5)
+    tk.Button(btn_frame, text=_('🔄 Refresh'), command=lambda: (w.destroy(), self.h_darknet([], '')),
+              bg=Colors.dark, fg=Colors.cyan, font=('Consolas', 9),
+              relief=tk.RAISED, bd=1, padx=10, cursor='hand2').pack(side=tk.LEFT, padx=10)
+    tk.Button(btn_frame, text=_('Close'), command=w.destroy,
+              bg=Colors.dark, fg=Colors.cyan, font=('Consolas', 10),
+              relief=tk.RAISED, bd=2, padx=15, pady=3, cursor='hand2').pack(side=tk.RIGHT, padx=10)
+
+
+def _buy_darknet(self, eid, w):
+    """Purchase an exploit from the Darknet."""
+    ex = g.buy_exploit(eid)
+    if ex is None:
+        self.console_out(_('Cannot purchase: insufficient funds or already owned.'), 'red')
+        self._sound_error()
+        return
+    # Add the file to local storage if it has content
+    if 'content' in ex:
+        g.local_files.append({'name': ex['name'], 'content': ex['content']})
+    self.console_out(_fmt('[+] DOWNLOADED: {} from Darknet!', ex['name']), 'green')
+    self.console_out(_fmt('    {}', _(ex['desc'])), 'dim')
+    g.add_log(_fmt('Darknet purchase: {} (${})', ex['name'], ex['cost']), 'ok')
+    g.check_achievements()
+    self._sound_success()
+    self.refresh_all()
+    w.destroy()
+    self.h_darknet([], '')
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Patch methods onto HackerApp
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1178,3 +1288,5 @@ HackerApp.h_alias = h_alias
 HackerApp.h_unalias = h_unalias
 HackerApp.h_stats = h_stats
 HackerApp.h_email = h_email
+HackerApp.h_darknet = h_darknet
+HackerApp._buy_darknet = _buy_darknet

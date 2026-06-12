@@ -85,6 +85,8 @@ class HackerApp:
         # Boot window handles all intro narrative + login drama
         self.root.after(25000, lambda: setattr(self, '_boot_silent', False))
 
+        self.start_random_events()
+
         self.root.protocol('WM_DELETE_WINDOW', self.on_close)
         self.auto_save_loop()
 
@@ -827,7 +829,7 @@ class HackerApp:
             'ping', 'traceroute', 'schematic', 'route', 'missions', 'newmission',
             'achievements', 'config', 'upgrade', 'nextlevel', 'money', 'servers',
             'clear', 'abort', 'sound', 'alias', 'unalias', 'crypto', 'buycrypto',
-            'sellcrypto', 'combine', 'market', 'skills', 'stats', 'glitch',
+            'sellcrypto', 'combine', 'market', 'darknet', 'skills', 'stats', 'glitch',
             'newgame', 'intel', 'sellintel', 'story',
         ]
         if len(parts) == 1:
@@ -890,6 +892,7 @@ class HackerApp:
             'view': self.h_view,
             'intel': self.h_intel, 'sellintel': self.h_sellintel,
             'story': self.h_story,
+            'darknet': self.h_darknet,
         }
         if cmd not in h_map and cmd in g.aliases:
             self.exec_cmd(g.aliases[cmd])
@@ -897,6 +900,11 @@ class HackerApp:
         h = h_map.get(cmd)
         if h:
             h(args, line)
+            # Sentinel AI tick — reacts to every player command
+            sentinel_result = g.sentinel_tick()
+            if sentinel_result == 'sentinel_active':
+                self._screen_shake(400, 5)
+                self._sound_error()
         else:
             self.console_out(_fmt('Unknown command: {}. Type HELP.', cmd), 'red')
 
@@ -1407,6 +1415,37 @@ class HackerApp:
         self._ambient_running = True
         threading.Thread(target=run, daemon=True).start()
 
+    # ═══ RANDOM SYSTEM EVENTS ═════════════════════════════════════════════════
+
+    def start_random_events(self):
+        """Background thread that injects random [SYSTEM] / [NET] / [SEC]
+        log messages into the console periodically, creating the illusion
+        of a living, breathing network."""
+
+        def run():
+            while True:
+                if not hasattr(self, '_random_events_running') or not self._random_events_running:
+                    break
+                # Random interval: 20–60 seconds between events
+                time.sleep(random.uniform(20, 60))
+                if self._boot_state != 'DONE':
+                    continue
+                try:
+                    ev = g.random_event()
+                    if ev is None:
+                        continue
+                    text, color, _ = ev
+                    self.console_out(text, color)
+                    g.add_log(text, 'info')
+                except Exception:
+                    pass
+
+        self._random_events_running = True
+        threading.Thread(target=run, daemon=True).start()
+
+    def stop_random_events(self):
+        self._random_events_running = False
+
     # ═══ SAVE / LOAD ════════════════════════════════════════════════════════
 
     def save(self):
@@ -1464,6 +1503,7 @@ class HackerApp:
     def on_close(self):
         self.restart_requested = False
         self._autosave_running = False
+        self.stop_random_events()
         g.save(AUTO_FILE)
         self.root.destroy()
 

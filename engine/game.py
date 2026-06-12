@@ -8,7 +8,7 @@ import random
 import time
 
 from engine.config import SAVE_FILE, AUTO_FILE
-from data import SERVERS_POOL, GOV_INTEL_TYPES, GOV_DOMAINS, STORY_MISSIONS, DARIUS_EMAILS, HARDWARE
+from data import SERVERS_POOL, GOV_INTEL_TYPES, GOV_DOMAINS, STORY_MISSIONS, DARIUS_EMAILS, HARDWARE, EXPLOITS
 
 
 from ui.lang import _, _fmt
@@ -152,6 +152,18 @@ class Game:
         self.narrative_unread = [dict(e) for e in DARIUS_EMAILS]
         self.narrative_switch_used = False
         self._notify_cb = None
+        # ── Darknet / exploits ──
+        self.exploits = []        # list of exploit IDs the player owns
+        self.stealth_charges = 0  # remaining stealth boost actions
+        # ── Sentinel AI ──
+        self.sentinel_state = 'DORMANT'  # DORMANT → ANALYZING → ACTIVE
+        self.sentinel_timer = 0          # ticks before state transition
+        self.sentinel_cooldown = 0       # ticks before can re-enter ACTIVE
+        self.sentinel_strikes = 0        # how many times sentinel attacked
+        self.ports_closed = {}           # {server_name: [port, ...]} ports sentinel closed
+        # ── Random events ──
+        self.event_timer = 0
+        self.event_paused = False
 
     # ── Hardware helpers ──
 
@@ -503,6 +515,216 @@ class Game:
             'crypto_bonus': 1 + 0.3 * self.skills['crypto_bonus'],
             'trace_reduce': 0.05 * self.skills['trace_reduce'],
         }
+
+    # ── Darknet / Exploit helpers ──
+
+    def has_exploit(self, eid):
+        """Check if player owns a specific exploit by ID."""
+        return eid in self.exploits
+
+    def buy_exploit(self, eid):
+        """Add an exploit to inventory. Returns the exploit dict or None."""
+        for ex in EXPLOITS:
+            if ex['id'] == eid:
+                if self.money < ex['cost'] or eid in self.exploits:
+                    return None
+                self.money -= ex['cost']
+                self.exploits.append(eid)
+                return ex
+        return None
+
+    def get_exploits_purchasable(self):
+        """Return list of exploits the player can afford and doesn't own."""
+        return [ex for ex in EXPLOITS
+                if ex['id'] not in self.exploits and self.money >= ex['cost']]
+
+    def get_exploits_owned(self):
+        """Return list of exploit dicts the player owns."""
+        return [ex for ex in EXPLOITS if ex['id'] in self.exploits]
+
+    # ── Sentinel AI (Ghost in the Machine) ──
+
+    def sentinel_tick(self):
+        """Advance the Sentinel FSM by one tick (called on player actions).
+        
+        States:
+          DORMANT   → no threat detected
+          ANALYZING → suspicious activity, scanning countermeasures
+          ACTIVE    → actively attacking: closing ports, deleting files
+        
+        Transitions are driven by trace_level and player actions.
+        """
+        # Cooldown expired?
+        if self.sentinel_cooldown > 0:
+            self.sentinel_cooldown -= 1
+            if self.sentinel_cooldown <= 0 and self.sentinel_state == 'DORMANT':
+                # Done cooling down, but stays dormant
+                pass
+
+        # If player has firewall_bypass, sentinel is suppressed
+        if self.has_exploit('firewall_bypass'):
+            if self.sentinel_state == 'ACTIVE':
+                self.add_log(_('[SENTINEL] Firewall bypass active — countermeasures suppressed.'), 'info')
+            return  # no sentinel activity while bypass active
+
+        if self.sentinel_state == 'DORMANT':
+            # Transition to ANALYZING when trace > 30 or on suspicious actions
+            if self.trace_level > 30 or self.sentinel_timer > 5:
+                self.sentinel_state = 'ANALYZING'
+                self.sentinel_timer = 0
+                self.add_log(_('[SENTINEL] Unusual network activity detected. Entering analysis mode.'), 'yellow')
+                self.add_log(_fmt('[SENTINEL] Trace signature: {}%', self.trace_level), 'dim')
+                self.add_news('⚠ Sentinel AI is analyzing your traffic.')
+                if self._notify_cb:
+                    self._notify_cb(_('SENTINEL analyzing...'), 'yellow')
+            else:
+                self.sentinel_timer += 1
+
+        elif self.sentinel_state == 'ANALYZING':
+            # Accumulate timer — after enough ticks or high trace → ACTIVE
+            self.sentinel_timer += 1
+            if self.trace_level > 60 or self.sentinel_timer > 8:
+                self.sentinel_state = 'ACTIVE'
+                self.sentinel_timer = 0
+                self.sentinel_strikes += 1
+                self.add_log(_('[SENTINEL] ⚠ INTRUSION CONFIRMED. Activating countermeasures.'), 'red')
+                self.add_log(_('[SENTINEL] Locking ports and removing unauthorized files.'), 'red')
+                self.add_news('🚨 SENTINEL IS ACTIVE! Countermeasures deployed!')
+                if self._notify_cb:
+                    self._notify_cb(_('🚨 SENTINEL ACTIVE!'), 'red')
+                return 'sentinel_active'
+            # Still analyzing — random checks
+            if random.random() < 0.25 and self.trace_level > 40:
+                self.add_log(_('[SENTINEL] Scanning for known exploit signatures...'), 'dim')
+
+        elif self.sentinel_state == 'ACTIVE':
+            # Active attack: close ports, delete files, increase trace
+            self.sentinel_timer += 1
+
+            # Every 3-4 ticks, do something nasty
+            if self.sentinel_timer % 3 == 0:
+                self._sentinel_strike()
+
+            # Transition back to dormant after enough actions or if trace drops
+            if self.trace_level < 15 and self.sentinel_timer > 6:
+                self.sentinel_state = 'DORMANT'
+                self.sentinel_timer = 0
+                self.sentinel_cooldown = 15
+                self.add_log(_('[SENTINEL] Threat neutralized. Returning to dormant state.'), 'green')
+                self.add_news('✅ Sentinel back to dormant.')
+                if self._notify_cb:
+                    self._notify_cb(_('Sentinel dormant.'), 'green')
+
+            # If trace hits 0, sentinel loses track
+            if self.trace_level <= 0:
+                self.sentinel_state = 'DORMANT'
+                self.sentinel_timer = 0
+                self.sentinel_cooldown = 10
+                self.add_log(_('[SENTINEL] Target lost. Resetting countermeasures.'), 'dim')
+
+        return None
+
+    def _sentinel_strike(self):
+        """Execute a Sentinel countermeasure."""
+        strikes = [
+            self._sentinel_close_ports,
+            self._sentinel_delete_files,
+            self._sentinel_increase_trace,
+        ]
+        action = random.choice(strikes)
+        action()
+
+    def _sentinel_close_ports(self):
+        """Close a random cracked port on the current server."""
+        if self.current_server and self.hacked(self.current_server):
+            # Find a port that's been cracked
+            cracked_ports = [p for p in self.current_server.get('cracked', {})
+                             if self.current_server['cracked'].get(p)]
+            if cracked_ports:
+                target = random.choice(cracked_ports)
+                self.current_server['cracked'][target] = False
+                sn = self.current_server['name']
+                if sn not in self.ports_closed:
+                    self.ports_closed[sn] = []
+                self.ports_closed[sn].append(target)
+                self.add_log(
+                    _fmt('[SENTINEL] Port {} closed on {} by firewall.', target, sn),
+                    'red'
+                )
+                self.add_news('Sentinel closed port {p} on {h}!', p=target, h=sn)
+                if self._notify_cb:
+                    self._notify_cb(_fmt('🚪 Port {} closed by Sentinel!', target), 'red')
+
+    def _sentinel_delete_files(self):
+        """Delete a random downloaded file from local storage."""
+        if self.local_files:
+            idx = random.randint(0, len(self.local_files) - 1)
+            gone = self.local_files.pop(idx)
+            self.add_log(
+                _fmt('[SENTINEL] File "{}" has been remotely deleted.', gone["name"]),
+                'red'
+            )
+            self.add_news('Sentinel deleted {f}!', f=gone['name'])
+            if self._notify_cb:
+                self._notify_cb(_fmt('📁 "{}" deleted by Sentinel!', gone['name']), 'red')
+
+    def _sentinel_increase_trace(self):
+        """Jump trace level as a punishment."""
+        jump = random.uniform(5, 15)
+        self.trace_level = min(100, self.trace_level + jump)
+        self.max_trace = max(self.max_trace, self.trace_level)
+        self.add_log(
+            _fmt('[SENTINEL] Trace signal amplified! +{:.0f}%', jump),
+            'red'
+        )
+        self.add_news('Sentinel amplified trace signal!')
+
+    def sentinel_hacked_server(self, s):
+        """Check if Sentinel has closed ports on this server, making it
+        no longer fully hacked."""
+        if s['name'] in self.ports_closed:
+            closed = self.ports_closed[s['name']]
+            # Check if any key port is closed
+            for p in closed:
+                if s['cracked'].get(p) == False:
+                    return False
+        return True
+
+    # ── Random events ──
+
+    RANDOM_EVENTS = [
+        "[SYSTEM] Maintenance window: 5 minutes. Some services may restart.",
+        "[NET] Unusual traffic spike from IP {ip4}",
+        "[SEC] Firewall signature updated. 12 new rules deployed.",
+        "[SYS] Background scan: {n} files checked, {n2} threats found.",
+        "[NET] Connection timeout on upstream router (hop {h}).",
+        "[SEC] Brute-force attempt detected on secondary server.",
+        "[SYS] Kernel module nf_conntrack updated.",
+        "[NET] Routing table recalculated. Latency: {ms}ms.",
+        "[SEC] Intrusion detection system: pattern update #{n}.",
+        "[SYS] Log rotation complete. {n} archives purged.",
+        "[NET] Bandwidth throttling detected on port {p}.",
+    ]
+    EVENT_COLORS = ['yellow', 'orange', 'red', 'dim', 'orange', 'red',
+                    'dim', 'orange', 'red', 'dim', 'orange']
+
+    def random_event(self):
+        """Generate a random system event message."""
+        if self.event_paused:
+            return None
+        idx = random.randrange(len(self.RANDOM_EVENTS))
+        template = self.RANDOM_EVENTS[idx]
+        color = self.EVENT_COLORS[idx]
+        r4 = lambda: random.randint(1, 254)
+        rn = lambda: random.randint(10, 9999)
+        text = template.format(
+            ip4=f'{r4()}.{r4()}.{r4()}.{r4()}',
+            n=rn(), n2=rn() + random.randint(1, 100),
+            h=random.randint(1, 24),
+            ms=random.randint(10, 500),
+            p=random.randint(1, 65535),
+        )
+        return text, color, random.uniform(0.3, 0.8)
 
     # ── Save / Load ──
 
