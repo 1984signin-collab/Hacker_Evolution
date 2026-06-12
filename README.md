@@ -10,9 +10,11 @@
 
 ## 🎮 Story
 
-You are **Ne0n**, a ghost hacker moving through the shadows of the network. After cracking the mainframe of *OmniCorp* — the megacorporation controlling 90% of the world's data — you've made a name for yourself in the underground. But OmniCorp doesn't forget. Every move you make could be your last.
+You are a hacker who receives a mysterious email from **Darius**, a former CTO of **Nexus Corporation** who is now dead. His security system — *Overwatch* — has 14 days of autonomy, and it chose you as the only one who can access his legacy.
 
-With the help of **Cipher**, a rogue AI guiding you through encrypted channels, you explore secret servers, fortified databanks, and military mainframes. The more data you steal, the more powerful you become. But beware: every connection leaves traces.
+Nexus built Overwatch to protect critical infrastructure, but they weaponized it: mass surveillance, data trafficking, election manipulation, and ties to government black ops. The evidence is scattered across their servers — corporate, government, and military.
+
+Your mission: breach Nexus's network, steal the truth, and make a final choice that will change everything.
 
 > *"In cyberspace, no one can hear you type."*
 
@@ -26,9 +28,9 @@ With the help of **Cipher**, a rogue AI guiding you through encrypted channels, 
 | **Network Simulation** | Servers, firewalls, ports, real-time connections |
 | **Hacking System** | Scan, crack, connect, download, upload, exec |
 | **Economy** | Earn credits by selling data, buy upgrades |
-| **Leaderboard** | Compete against NPC hackers |
 | **Dynamic Story** | Unfolds episodically via the STORY command |
 | **Hardware System** | RAM, CPU, personal firewall — upgrade your rig |
+| **Modular Content** | Missions and emails are individual .json files — add your own without touching code |
 
 ### Commands
 
@@ -97,24 +99,113 @@ This will overwrite `assets/demo.gif`.
 
 ```
 hacker-evolution/
-├── main.py                 # Entry point
-├── engine/
-│   ├── game.py             # Game logic, state, network
-│   └── config.py           # Configuration and colors
-├── ui/
-│   ├── app.py              # Main window and event loop
-│   ├── commands.py         # Command implementations
-│   ├── hud.py              # Animated heads-up display
-│   ├── panels.py           # Side panels and map
-│   └── rich_bridge.py      # Rich → tkinter Text widget bridge
+├── main.py                     # Entry point
+├── engine/                     # Game engine (logic, not content)
+│   ├── game.py                 # Game state, network, save/load
+│   └── config.py               # Configuration and colors
+├── ui/                         # User interface (tkinter + Rich)
+│   ├── app.py                  # Main window and event loop
+│   ├── commands.py             # Command implementations
+│   ├── hud.py                  # Animated heads-up display
+│   ├── panels.py               # Side panels and map
+│   └── rich_bridge.py          # Rich → tkinter Text widget bridge
+├── data/                       # 📁 CONTENT — edit these to mod the game
+│   ├── __init__.py             # Auto-loader (reads all .json files)
+│   ├── missions/               # 📜 Story missions (one file per mission)
+│   │   ├── 01_captain_crunch.json
+│   │   ├── 02_the_414s.json
+│   │   └── ...
+│   ├── emails/                 # 📧 Darius emails (one file per email)
+│   │   ├── 01_welcome.json
+│   │   ├── 02_system_blueprint.json
+│   │   └── ...
+│   ├── servers.json            # 🌐 Server pool
+│   ├── gov_intel.json          # 🏛️ Government intel types
+│   └── hardware.json           # 🔧 Hardware shop items
 ├── scripts/
-│   └── capture_gif.py      # Gameplay GIF capture script
+│   └── capture_gif.py          # Gameplay GIF capture script
 ├── assets/
-│   ├── demo.gif            # Demo GIF
-│   └── screenshot.png      # Static screenshot
-├── data/                   # Game data (saves, configs)
-└── requirements.txt        # Python dependencies
+│   ├── demo.gif                # Demo GIF
+│   └── screenshot.png          # Static screenshot
+└── requirements.txt            # Python dependencies
 ```
+
+## 🧩 Creating Content (Mod System)
+
+The game loads all missions and emails from individual `.json` files. **No Python code to touch.** Just drop a file in the right folder and it works.
+
+### 📜 Adding a Mission
+
+Create a new file in `data/missions/` (e.g. `my_mission.json`):
+
+```json
+{
+  "id": "my_custom_mission",
+  "lvl": 3,
+  "name": "The Hidden Server",
+  "target": null,
+  "desc": "Rumors speak of a server no one has ever breached. Find it, crack it, and prove your worth.",
+  "obj": "Crack port 443 on a government server and download the file \"classified.db\"",
+  "reward": 2500,
+  "obj_type": "download",
+  "obj_file": "classified.db"
+}
+```
+
+**Fields explained:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique identifier for the mission |
+| `lvl` | number | Minimum player level to unlock |
+| `name` | string | Display name |
+| `desc` | string | Lore description |
+| `obj` | string | Objective text shown to the player |
+| `reward` | number | Money reward on completion |
+| `obj_type` | string | Trigger type (`download`, `bounce`, `login`, `combine`, `gsm_transfer`, `levin_heist`, `lamp_upload`, `mckinnon_intel`, `download_multi`, `anon_rising`, `hack`, `crack`, `transfer`, `intel`) |
+| `obj_file` | string | (optional) Required file for download missions |
+| `obj_count` | number | (optional) Required count for multi-step missions |
+
+### 📧 Adding an Email
+
+Create a new file in `data/emails/` (e.g. `04_hint.json`):
+
+```json
+{
+  "sub": "A Friendly Warning",
+  "lvl": 4,
+  "body": "I've heard rumors that Nexus is stepping up their game.\nThey've deployed new intrusion detection systems.\nUpgrade your firewall before hitting the big targets.\n— Darius"
+}
+```
+
+**Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `sub` | string | Subject line |
+| `lvl` | number | Level at which the email becomes readable |
+| `body` | string | Email body text (use `\n` for line breaks) |
+
+### 🧪 Validation
+
+The game **will not crash** if a JSON file has a syntax error. You'll see a friendly message in the terminal:
+
+```
+[ERROR] Data file 'my_mission.json' in data/missions/ is corrupt. Skipping.
+```
+
+Fix the file and restart the game.
+
+### 🤝 How to Contribute
+
+> **Want to create content? Just add a `.json` file in `/data/missions/` or `/data/emails/` and submit a Pull Request!**
+
+1. Fork the repository
+2. Add your `.json` file(s) to the appropriate folder
+3. Test by running the game locally
+4. Submit a Pull Request
+
+Your mission could be part of the official game!
 
 ---
 
