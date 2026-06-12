@@ -1,0 +1,5 @@
+{
+  "sub": "System Blueprint",
+  "lvl": 2,
+  "body": "Nexus has 3 server tiers. Corporate servers on the surface,\ninternal servers in the middle, and mainframes deep down.\nGovernment servers are protected by military-grade encryption.\nUse DECRYPT to decrypt keys. Each key requires\ncomputing power. Upgrade CPU with UPGRADE.\nI left weak passwords scattered around. Try LOGIN with:\n  \"admin123\" on port 999\n  \"letmein\" on port 25\n  \"root!\" on port 21\nPasswords are the weakest link in every system."
+}

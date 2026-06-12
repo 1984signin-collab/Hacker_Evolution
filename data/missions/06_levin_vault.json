@@ -1,0 +1,11 @@
+{
+  "id": "levin_vault",
+  "lvl": 6,
+  "name": "Levin's Vault",
+  "target": null,
+  "desc": "Vladimir Levin convinced his accomplices to transfer 10 million from Citibank. Use a chain of 5 bounce servers to cover your tracks and transfer funds from a bank.",
+  "obj": "5-hop chain and TRANSFER of at least $10,000",
+  "reward": 3000,
+  "obj_type": "levin_heist",
+  "obj_count": 5
+}

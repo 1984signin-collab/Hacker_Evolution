@@ -1,0 +1,11 @@
+{
+  "id": "anonymous_rising",
+  "lvl": 10,
+  "name": "Anonymous Rising",
+  "target": null,
+  "desc": "It's time to lead the uprising. Coordinate a massive DDoS attack. Build 3 parallel bounce chains and launch an exploit on a government server.",
+  "obj": "3 chains of 2 hops EACH + crack a government server",
+  "reward": 25000,
+  "obj_type": "anon_rising",
+  "obj_count": 3
+}

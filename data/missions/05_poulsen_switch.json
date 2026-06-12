@@ -1,0 +1,10 @@
+{
+  "id": "poulsen_switch",
+  "lvl": 5,
+  "name": "Poulsen's Switch",
+  "target": null,
+  "desc": "Kevin Poulsen hijacked KIIS-FM phone lines to win a Porsche. Tamper with a GSM server and redirect routing to win the prize.",
+  "obj": "Crack a GSM server (GSM tower) and transfer the file \"channel-3\"",
+  "reward": 1800,
+  "obj_type": "gsm_transfer"
+}

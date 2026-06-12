@@ -1,0 +1,11 @@
+{
+  "id": "gonzalez_ring",
+  "lvl": 9,
+  "name": "Gonzalez Ring",
+  "target": null,
+  "desc": "Albert Gonzalez orchestrated the largest credit card theft — 170 million numbers. Extract data from 5 different commercial servers (DOWNLOAD files from 5 servers).",
+  "obj": "Download files from 5 different servers",
+  "reward": 15000,
+  "obj_type": "download_multi",
+  "obj_count": 5
+}

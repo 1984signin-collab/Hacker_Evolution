@@ -1,0 +1,11 @@
+{
+  "id": "captain_crunch",
+  "lvl": 1,
+  "name": "Captain Crunch",
+  "target": null,
+  "desc": "John Draper discovered that a toy whistle in Captain Crunch cereal boxes emitted 2600Hz — the frequency to redirect telephone calls. Find a blue box schematic on an old BBS and decrypt the MF tones.",
+  "obj": "DECRYPT a BBS server and download the file \"blueprint.bin\"",
+  "reward": 400,
+  "obj_type": "download",
+  "obj_file": "blueprint.bin"
+}

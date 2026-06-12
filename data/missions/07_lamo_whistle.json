@@ -1,0 +1,10 @@
+{
+  "id": "lamo_whistle",
+  "lvl": 7,
+  "name": "Lamo's Confession",
+  "target": null,
+  "desc": "Adrian Lamo breached the New York Times and added his name to the op-ed database. Find a news server, crack it, and upload a text file to publish the truth.",
+  "obj": "Crack a news server, perform UPLOAD of a .txt file",
+  "reward": 5000,
+  "obj_type": "lamp_upload"
+}

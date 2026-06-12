@@ -1,0 +1,10 @@
+{
+  "id": "mckinnon_search",
+  "lvl": 8,
+  "name": "McKinnon's Search",
+  "target": null,
+  "desc": "Gary McKinnon searched for proof of UFO technology on NASA and Pentagon servers. Breach a military .mil server, steal the intelligence, and sell it on the black market.",
+  "obj": "Steal intel from a .mil server and sell it with SELLINTEL",
+  "reward": 8000,
+  "obj_type": "mckinnon_intel"
+}

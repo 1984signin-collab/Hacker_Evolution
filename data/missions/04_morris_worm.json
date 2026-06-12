@@ -1,0 +1,10 @@
+{
+  "id": "morris_worm",
+  "lvl": 4,
+  "name": "Morris Worm",
+  "target": null,
+  "desc": "Robert Morris Jr. released the first worm on the Internet in 1988. Your worm has escaped control. Create a kill-sig by combining two virus files and upload it to an infected server.",
+  "obj": "Use COMBINE to create a kill-sig, then UPLOAD to a server",
+  "reward": 1200,
+  "obj_type": "combine"
+}

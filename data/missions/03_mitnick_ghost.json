@@ -1,0 +1,10 @@
+{
+  "id": "mitnick_ghost",
+  "lvl": 3,
+  "name": "Mitnick's Ghost",
+  "target": null,
+  "desc": "Kevin Mitnick used social engineering as his primary weapon. CONNECT to a corporate server using LOGIN with a password found elsewhere to impersonate an administrator.",
+  "obj": "Use LOGIN to access a server with a known password",
+  "reward": 800,
+  "obj_type": "login"
+}

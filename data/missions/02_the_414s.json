@@ -1,0 +1,11 @@
+{
+  "id": "the_414s",
+  "lvl": 2,
+  "name": "The 414 Gang",
+  "target": null,
+  "desc": "In 1983, the 414 group breached over 60 systems including Los Alamos Labs. Their strength was the chain. Prove your skill by connecting 3 servers in a bounce chain.",
+  "obj": "Build a bounce chain of at least 3 hops",
+  "reward": 600,
+  "obj_type": "bounce",
+  "obj_count": 3
+}
