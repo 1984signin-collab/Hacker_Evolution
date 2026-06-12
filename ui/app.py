@@ -77,6 +77,7 @@ class HackerApp:
         self.update_map()
         self.refresh_all()
 
+        self.restart_requested = False
         self._boot_silent = True
         self._boot_state = 'BOOTING'
         self.root.after(500, self._animate_seps)
@@ -239,12 +240,12 @@ class HackerApp:
             ("[    2.670000] systemd[1]: Starting Network Manager...", "#aaa"),
             ("[    3.000000] systemd[1]: Reached target Multi-User System", "#0a0"),
             # ── Tutorial hints ──
-            ("[    3.200000] WARNING: Credenziali di backup in /tmp/recovery.txt", "#ff0"),
-            ("[    3.500000] NOTICE: /tmp/recovery.txt: chiave di recupero valida", "#0a0"),
-            ("[    3.800000] SYS: Connessione al server Darius.OWC interrotta (timeout)", "#888"),
-            ("[    4.100000] SEC: Ultimo accesso: hacker — 14g fa — IP: <sconosciuto>", "#888"),
-            ("[    4.400000] NET: Scan in corso... 2 host trovati: secure.corp, nexus.owc", "#888"),
-            ("[    4.700000] SYS: File di log: /var/log/auth.log — tentativi sospetti", "#888"),
+            ("[    3.200000] WARNING: Backup credentials in /tmp/recovery.txt", "#ff0"),
+            ("[    3.500000] NOTICE: /tmp/recovery.txt: valid recovery key", "#0a0"),
+            ("[    3.800000] SYS: Connection to Darius.OWC server interrupted (timeout)", "#888"),
+            ("[    4.100000] SEC: Last access: hacker — 14d ago — IP: <unknown>", "#888"),
+            ("[    4.400000] NET: Scanning... 2 hosts found: secure.corp, nexus.owc", "#888"),
+            ("[    4.700000] SYS: Log file: /var/log/auth.log — suspicious attempts", "#888"),
             ("[    5.000000] systemd[1]: Starting getty on tty1...", "#aaa"),
             ("", ""),
             ("  ██╗  ██╗ █████╗  ██████╗██╗  ██╗███████╗██████╗ ", "#0f0"),
@@ -322,11 +323,11 @@ class HackerApp:
                 # Smart help/hint detection
                 if pwd in ('help', 'hint', '?', 'aiuto'):
                     t.insert(tk.END, '\n')
-                    self._boot_insert('[SYS] Suggerimento: controlla i log di boot.\n', '#0a0')
-                    self._boot_insert('[SYS] Cerca "credenziali" o "recovery" nei messaggi.\n', '#0a0')
+                    self._boot_insert('[SYS] Tip: check the boot logs.\n', '#0a0')
+                    self._boot_insert('[SYS] Search for "credentials" or "recovery" in the messages.\n', '#0a0')
                     if not self._boot_hint_shown:
                         self._boot_hint_shown = True
-                        self._boot_insert('[SYS] (Suggerimento: /tmp/recovery.txt)\n', '#ff0')
+                        self._boot_insert('[SYS] (Hint: /tmp/recovery.txt)\n', '#ff0')
                     t.see(tk.END)
                     self.root.after(600, self._boot_login_prompt)
                     return 'break'
@@ -381,7 +382,7 @@ class HackerApp:
     def _boot_verifying(self):
         t = self._boot_txt
         t.insert(tk.END, '\n')
-        self._boot_insert('Verifica credenziali', '#0a0')
+        self._boot_insert('Verifying credentials', '#0a0')
         self._boot_state = 'VERIFYING'
 
         def dot_step(n=0):
@@ -422,14 +423,14 @@ class HackerApp:
         t.delete('end-3l', 'end-1l')  # clean glitch lines
         t.insert(tk.END, '\n\n')
         self._boot_insert('╔═══════════════════════════════════════════════╗\n', '#0f0')
-        self._boot_insert('║    SISTEMA DI EMERGENZA — DARIUS              ║\n', '#0f0')
-        self._boot_insert('║    "Se stai leggendo questo, sono morto."     ║\n', '#0f0')
+        self._boot_insert('║    EMERGENCY SYSTEM — DARIUS                   ║\n', '#0f0')
+        self._boot_insert('║    "If you are reading this, I am dead."      ║\n', '#0f0')
         self._boot_insert('╚═══════════════════════════════════════════════╝\n', '#0f0')
         t.insert(tk.END, '\n')
-        self._boot_insert('[SYS] Connessione al server Nexus interrotta 14g fa...\n', '#4488ff')
-        self._boot_insert('[SYS] Email automatica inviata a: <sconosciuto>\n', '#4488ff')
-        self._boot_insert('[SEC] Credenziali legacy trovate. Inizia con SCAN.\n', '#ffbb00')
-        self._boot_insert('[NET] Scansione rete in corso...\n', '#00ddff')
+        self._boot_insert('[SYS] Connection to Nexus server interrupted 14d ago...\n', '#4488ff')
+        self._boot_insert('[SYS] Automatic email sent to: <unknown>\n', '#4488ff')
+        self._boot_insert('[SEC] Legacy credentials found. Start with SCAN.\n', '#ffbb00')
+        self._boot_insert('[NET] Network scan in progress...\n', '#00ddff')
         t.insert(tk.END, '\n')
         self._boot_insert('═══ HACKER EVOLUTION — Created by 404 Fun Not Found ═══\n', '#00ddff')
         t.see(tk.END)
@@ -444,9 +445,9 @@ class HackerApp:
         self.console.config(state=tk.NORMAL)
         self.console.delete('1.0', tk.END)
         self.console.config(state=tk.DISABLED)
-        self.console_out('\n📧 HAI 1 NUOVA EMAIL da Darius. Digita EMAIL per leggerla.', 'yellow')
-        self.console_out('Digita HELP per i comandi.', 'dim')
-        g.add_log('System online. Darius legacy attivo.', 'ok')
+        self.console_out(_('\n📧 YOU HAVE 1 NEW EMAIL from Darius. Type EMAIL to read it.'), 'yellow')
+        self.console_out(_('Type HELP for commands.'), 'dim')
+        g.add_log(_('System online. Darius legacy active.'), 'ok')
         self._beep(660, 30)
 
     # ═══ TITLE BAR ══════════════════════════════════════════════════════════
@@ -634,7 +635,7 @@ class HackerApp:
         sf.pack(fill=tk.X, pady=(0, 5))
         self.sys = {}
         for k, lbl, unit, clr in [
-            ('money', '💰 Soldi', '', '#ffbb00'),
+            ('money', _('💰 Money'), '', '#ffbb00'),
             ('trace', '⚠️ Trace', '%', '#ff2244'),
             ('score', '🏆 Score', '', '#00ff88'),
             ('level', '📊 Level', '', '#00ddff'),
@@ -718,6 +719,7 @@ class HackerApp:
             ('📤 Export', self.export),
             ('📥 Import', self.import_),
             ('🔧 Upgrade', self.show_upgrade),
+            ('⚙ Config', self.show_config),
         ]:
             tk.Button(btn, text=t, command=c, bg=Colors.dark, fg=Colors.cyan,
                       activebackground='#1a3a6a', activeforeground=Colors.white,
@@ -741,6 +743,8 @@ class HackerApp:
         fm.add_command(label='📤 Export...', command=self.export)
         fm.add_command(label='📥 Import...', command=self.import_)
         fm.add_separator()
+        fm.add_command(label='⚙ Settings', command=self.show_config)
+        fm.add_separator()
         fm.add_command(label='🚪 Esci', command=self.on_close)
 
     # ═══ BINDINGS ═══════════════════════════════════════════════════════════
@@ -754,8 +758,8 @@ class HackerApp:
             '[!] Livello successivo... digita NEXTLEVEL', 'yellow'))
         self.root.bind('<F5>', lambda e: self.show_missions())
         self.root.bind('<F6>', lambda e: self.show_achievements())
-        self.root.bind('<F7>', lambda e: self.console_out('Notizie recenti:', 'yellow') or
-                       [self.console_out(f'  {n}', 'dim') for n in g.news[:5]])
+        self.root.bind('<F7>', lambda e: self.console_out(_('Recent news:'), 'yellow') or
+                       [self.console_out(_fmt('  {}', n), 'dim') for n in g.news[:5]])
         self.root.bind('<F8>', lambda e: self.h_stats([], ''))
         self.input.bind('<Tab>', self._tab_complete)
 
@@ -851,8 +855,8 @@ class HackerApp:
             return
         cmd = parts[0].lower()
         args = parts[1:]
-        self.console_out(f'> {line}', 'dim')
-        self.g.add_log(f'> {line}', 'info')
+        self.console_out(_fmt('> {}', line), 'dim')
+        self.g.add_log(_fmt('> {}', line), 'info')
 
         h_map = {
             'help': self.h_help, '?': self.h_help,
@@ -894,7 +898,7 @@ class HackerApp:
         if h:
             h(args, line)
         else:
-            self.console_out(f'Comando sconosciuto: {cmd}. Digita HELP.', 'red')
+            self.console_out(_fmt('Unknown command: {}. Type HELP.', cmd), 'red')
 
     # ═══ SCREEN SHAKE ═══════════════════════════════════════════════════════
 
@@ -1126,7 +1130,7 @@ class HackerApp:
                 self.map_canvas.create_text(x, y + r + 5, text='/'.join(str(p) for p in s['ports']),
                                             fill=Colors.cyan3, font=('Consolas', 7), anchor='n', tags='map')
             if is_connected:
-                self.map_canvas.create_text(x, y + r + 16, text='← CONNESSO',
+                self.map_canvas.create_text(x, y + r + 16, text='← CONNECTED',
                                             fill=Colors.cyan, font=('Consolas', 7, 'bold'), anchor='n', tags='map')
         self.bounce_anim += 1
 
@@ -1134,13 +1138,13 @@ class HackerApp:
         for s in g.servers:
             x, y = s['pos']
             if abs(e.x - x) < 20 and abs(e.y - y) < 20:
-                self.console_out(f'[MAP] {s["name"]}  Porte: {", ".join(str(p) for p in s["ports"])}  Bounce: {s["bounce_used"]}/3', 'cyan')
+                self.console_out(_fmt('[MAP] {}  Ports: {}  Bounce: {}/3', s["name"], ", ".join(str(p) for p in s["ports"]), s["bounce_used"]), 'cyan')
                 if s['scanned']:
-                    self.console_out(f'  Chiave: {s["key_bits"]}b  Soldi: ${s["money"]}  Files: {len(s["files"])}', 'green')
-                    st = 'DECIFRATO' if s['decrypted'] else 'CIFRATO'
+                    self.console_out(_fmt('  Key: {}b  Money: ${}  Files: {}', s["key_bits"], s["money"], len(s["files"])), 'green')
+                    st = 'DECRYPTED' if s['decrypted'] else 'ENCRYPTED'
                     for p in s['ports']:
                         st += f' | P{p}: {"OK" if s["cracked"].get(p) else "LOCK"}'
-                    self.console_out(f'  Stato: {st}', 'yellow')
+                    self.console_out(_fmt('  Status: {}', st), 'yellow')
                 return
 
     def map_right_click(self, e):
@@ -1276,38 +1280,38 @@ class HackerApp:
         mdone = sum(1 for m in g.missions if m['done'])
         atotal = len(g.achievements)
         self.console_out('═' * 60, 'yellow')
-        self.console_out('OBIETTIVI', 'yellow')
+        self.console_out(_('OBJECTIVES'), 'yellow')
         self.console_out('═' * 60, 'yellow')
-        self.console_out(f'  📊 Server hackerati: {done}/{len(g.servers)}', 'green')
-        self.console_out(f'  ⚠ Trace: {g.trace_level:.1f}%', 'cyan')
-        self.console_out(f'  💰 Soldi: ${g.money:,}  |  Score: {g.score}', 'yellow')
-        self.console_out(f'  📈 Livello: {g.level}  |  🏆 Achievement: {atotal}/{len(g.ACHIEVEMENTS)}', 'white')
+        self.console_out(_fmt('  📊 Hacked servers: {}/{}', done, len(g.servers)), 'green')
+        self.console_out(_fmt('  ⚠ Trace: {:.1f}%', g.trace_level), 'cyan')
+        self.console_out(_fmt('  Money: ${:,}  |  Score: {}', g.money, g.score), 'yellow')
+        self.console_out(_fmt('  Level: {}  |  Achievement: {}/{}', g.level, atotal, len(g.ACHIEVEMENTS)), 'white')
         if g.missions:
-            self.console_out(f'  📋 Missioni: {mdone}/{len(g.missions)} completate',
+            self.console_out(_fmt('  Missions: {}/{} completed', mdone, len(g.missions)),
                              'green' if mdone == len(g.missions) else 'yellow')
-        self.console_out(f'  🔁 Bounce hop: {len(g.bounce_chain)}', 'cyan')
+        self.console_out(_fmt('  🔁 Bounce hop: {}', len(g.bounce_chain)), 'cyan')
         self.console_out('─' * 60, 'yellow')
-        self.console_out('  F2=Obiettivi  F5=Missioni  F6=Achievement  F7=Notizie', 'dim')
+        self.console_out(_('  F2=Objectives  F5=Missions  F6=Achievement  F7=News'), 'dim')
         self.console_out('═' * 60, 'yellow')
 
     # ═══ MISSIONS & ACHIEVEMENTS (thin console wrappers) ════════════════════
 
     def show_missions(self):
         if not g.missions:
-            self.console_out('Nessuna missione attiva. Digita NEWMISSION per generarli.', 'yellow')
+            self.console_out(_('No active missions. Type NEWMISSION to generate.'), 'yellow')
             return
         self.console_out('═' * 60, 'cyan')
-        self.console_out('MISSIONI ATTIVE', 'yellow')
+        self.console_out(_('ACTIVE MISSIONS'), 'yellow')
         self.console_out('─' * 60, 'cyan')
         for i, m in enumerate(g.missions):
             st = '✓' if m['done'] else '○'
-            self.console_out(f'  {st} {m["desc"]:<45} ${m["reward"]}', 'green' if m['done'] else 'yellow')
+            self.console_out(_fmt('  {} {:<45} ${}', st, m["desc"], m["reward"]), 'green' if m['done'] else 'yellow')
         self.console_out('─' * 60, 'cyan')
-        self.console_out('Usa NEWMISSION per nuove missioni.', 'dim')
+        self.console_out(_('Use NEWMISSION for new missions.'), 'dim')
 
     def h_newmission(self, a, r):
         g.gen_missions()
-        self.console_out(f'Generate {len(g.missions)} nuove missioni!', 'green')
+        self.console_out(_fmt('Generated {} new missions!', len(g.missions)), 'green')
         self.show_missions()
 
     def h_missions(self, a, r):
@@ -1315,12 +1319,12 @@ class HackerApp:
 
     def show_achievements(self):
         self.console_out('═' * 60, 'cyan')
-        self.console_out('ACHIEVEMENTS', 'yellow')
+        self.console_out(_('ACHIEVEMENTS'), 'yellow')
         self.console_out('─' * 60, 'cyan')
         for a in g.ACHIEVEMENTS:
             unlocked = a[0] in g.achievements
             st = '🏆' if unlocked else '🔒'
-            self.console_out(f'  {st} {a[1]:<20} {a[2]:<30} {"+" + str(a[3]) if unlocked else ""}',
+            self.console_out(_fmt('  {} {:<20} {:<30} {}', st, a[1], a[2], "+" + str(a[3]) if unlocked else ""),
                              'green' if unlocked else 'dim')
         self.console_out('─' * 60, 'cyan')
 
@@ -1331,7 +1335,7 @@ class HackerApp:
         for aid in g.check_achievements():
             a = g.unlock_achievement(aid)
             if a:
-                self.console_type(f'🏆 Achievement sbloccato: {a[1]} (+${a[3]})', 'yellow', 20)
+                self.console_type(_fmt('🏆 Achievement unlocked: {} (+${})', a[1], a[3]), 'yellow', 20)
                 self._sound_success()
 
     # ═══ GLITCH EFFECT ══════════════════════════════════════════════════════
@@ -1407,31 +1411,31 @@ class HackerApp:
 
     def save(self):
         if g.save():
-            self.console_out('Partita salvata!', 'green')
+            self.console_out(_('Game saved!'), 'green')
 
     def load(self):
         if g.load():
             self.refresh_all()
             self.update_map()
-            self.console_out('Partita caricata!', 'green')
+            self.console_out(_('Game loaded!'), 'green')
         else:
-            self.console_out('Nessun salvataggio trovato.', 'red')
+            self.console_out(_('No save found.'), 'red')
 
     def export(self):
         p = filedialog.asksaveasfilename(defaultextension='.json',
                                           filetypes=[('JSON', '*.json')],
                                           initialfile=f'he_save_{int(time.time())}.json')
         if p and g.save(p):
-            self.console_out(f'Esportato: {p}', 'green')
+            self.console_out(_fmt('Exported: {}', p), 'green')
 
     def import_(self):
         p = filedialog.askopenfilename(filetypes=[('JSON', '*.json')])
         if p and g.load(p):
             self.refresh_all()
             self.update_map()
-            self.console_out('Importato!', 'green')
+            self.console_out(_('Imported!'), 'green')
         elif p:
-            self.console_out('File non valido.', 'red')
+            self.console_out(_('Invalid file.'), 'red')
 
     def auto_save_loop(self):
         if hasattr(self, '_autosave_running') and not self._autosave_running:
@@ -1445,11 +1449,20 @@ class HackerApp:
         g.crypto_tick()
         hb = g.hackback()
         if hb:
-            self.console_out(f'⚠ {hb}', 'red')
+            self.console_out(_fmt('⚠ {}', hb), 'red')
             self._sound_error()
         self.root.after(30000, self.auto_save_loop)
 
+    def restart(self):
+        """Save game and restart the entire UI."""
+        self.restart_requested = True
+        self._autosave_running = False
+        g.save(AUTO_FILE)
+        self.root.withdraw()  # hide old window cleanly
+        self.root.quit()      # stop mainloop -> main.py creates new app
+
     def on_close(self):
+        self.restart_requested = False
         self._autosave_running = False
         g.save(AUTO_FILE)
         self.root.destroy()
@@ -1466,3 +1479,5 @@ from ui import hud as _  # ensure hud is importable (HUDBackground used in __ini
 from ui.commands import *  # noqa: F401, F403 — patches h_* methods onto HackerApp
 from ui.panels import *    # noqa: F401, F403 — patches dialog methods onto HackerApp
 from ui.hud import HUDBackground  # noqa: F401 — re-export for importers
+
+from ui.lang import _, _fmt

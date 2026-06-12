@@ -1,17 +1,17 @@
 {
   "types": [
-    ["Project Chimera","Rapporto armi biologiche",5000, 600],
-    ["C4I Blueprint","Architettura rete militare C4I",4000, 512],
-    ["Drone Source Code","Codice sorgente drone Predator",6000, 700],
-    ["Satellite Crypto Key","Chiave crittografica satellite",3500, 400],
-    ["Black Ops Roster","Elenco agenti operazioni segrete",7000, 800],
-    ["Missile Guidance","Algoritmo guida missili",8000, 900],
-    ["WMD Status","Report armi distruzione massa",5500, 650],
-    ["Diplomatic Cables","Cablogrammi cifrati",4500, 500],
-    ["NSA Backdoor Vault","Lista backdoor NSA",6500, 750],
-    ["BioWeapon Data","Ricerca armi biologiche",7500, 850],
-    ["Launch Codes (Partial)","Codici lancio nucleare parziali",10000, 1000],
-    ["CyberWar Toolkit","Toolkit guerra informatica",9000, 950]
+    ["Project Chimera","Biological weapons report",5000, 600],
+    ["C4I Blueprint","C4I military network architecture",4000, 512],
+    ["Drone Source Code","Predator drone source code",6000, 700],
+    ["Satellite Crypto Key","Satellite cryptographic key",3500, 400],
+    ["Black Ops Roster","Covert operations agent roster",7000, 800],
+    ["Missile Guidance","Missile guidance algorithm",8000, 900],
+    ["WMD Status","Weapons of mass destruction report",5500, 650],
+    ["Diplomatic Cables","Encrypted diplomatic cables",4500, 500],
+    ["NSA Backdoor Vault","NSA backdoor list",6500, 750],
+    ["BioWeapon Data","Biological weapons research",7500, 850],
+    ["Launch Codes (Partial)","Partial nuclear launch codes",10000, 1000],
+    ["CyberWar Toolkit","Cyber warfare toolkit",9000, 950]
   ],
   "domains": ["defense.gov","state.gov","cia.gov","nsa.gov","fbi.gov","homeland.gov","pentagon.mil","nato.int"]
 }

@@ -6,5 +6,8 @@
 from ui.app import HackerApp
 
 if __name__ == '__main__':
-    app = HackerApp()
-    app.run()
+    while True:
+        app = HackerApp()
+        app.run()
+        if not app.restart_requested:
+            break

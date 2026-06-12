@@ -11,6 +11,7 @@ from engine.config import SAVE_FILE, AUTO_FILE
 from data import SERVERS_POOL, GOV_INTEL_TYPES, GOV_DOMAINS, STORY_MISSIONS, DARIUS_EMAILS, HARDWARE
 
 
+from ui.lang import _, _fmt
 # ═══════════════════════════════════════════════════════════════════════════════
 # Server generation
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -54,19 +55,19 @@ def generate_servers(count=10):
 
 class Game:
     ACHIEVEMENTS = [
-        ('first_hack', 'Primo Hack!', 'Hackerare il primo server', 5),
-        ('ten_hacks', 'Specialista', 'Hackerare 10 server', 25),
-        ('twenty_hacks', 'Hacker Legend', 'Hackerare 20 server', 100),
-        ('thief', 'Ladro', 'Totalizzare $10.000', 20),
-        ('rich', 'Ricco', 'Totalizzare $100.000', 50),
-        ('fat_cat', 'Gattone', 'Totalizzare $1.000.000', 500),
-        ('bounce_3', 'Bouncer', 'Catena di 3 hop', 10),
-        ('bounce_5', 'Bounce Master', 'Catena di 5 hop', 50),
-        ('trace_90', 'Fantasmino', 'Sopravvivere a trace 90%', 30),
-        ('hardware_full', 'Potenza', 'Tutto hardware al massimo', 100),
-        ('level_5', 'Veterano', 'Raggiungere livello 5', 20),
-        ('level_10', 'Elite', 'Raggiungere livello 10', 100),
-        ('neural', 'Cyberpunk', 'Comprare Neural Adapter', 200),
+        ('first_hack', 'First Hack!', 'Hack the first server', 5),
+        ('ten_hacks', 'Specialist', 'Hack 10 servers', 25),
+        ('twenty_hacks', 'Hacker Legend', 'Hack 20 servers', 100),
+        ('thief', 'Thief', 'Total $10,000', 20),
+        ('rich', 'Rich', 'Total $100,000', 50),
+        ('fat_cat', 'Fat Cat', 'Total $1,000,000', 500),
+        ('bounce_3', 'Bouncer', 'Chain of 3 hops', 10),
+        ('bounce_5', 'Bounce Master', 'Chain of 5 hops', 50),
+        ('trace_90', 'Ghost', 'Survive 90% trace', 30),
+        ('hardware_full', 'Power', 'All hardware maxed', 100),
+        ('level_5', 'Veteran', 'Reach level 5', 20),
+        ('level_10', 'Elite', 'Reach level 10', 100),
+        ('neural', 'Cyberpunk', 'Buy Neural Adapter', 200),
     ]
 
     def __init__(self):
@@ -167,11 +168,11 @@ class Game:
         if self.trace_level > self.max_trace:
             self.max_trace = self.trace_level
         if self.trace_level >= 100:
-            self.add_log('GAME OVER - Trace 100%', 'fail')
+            self.add_log(_('GAME OVER - Trace 100%'), 'fail')
             return True
         if self.trace_level > 70:
             self.add_news(
-                'ALLARME: Trace al {t:.0f}% — attività sospetta rilevata!',
+                _('WARNING: Trace at {t:.0f}% — suspicious activity detected!'),
                 t=self.trace_level,
             )
         return False
@@ -198,7 +199,7 @@ class Game:
                 self.achievements[aid] = True
                 self.money += a[3]
                 self.score += a[3] * 10
-                self.add_log(f'Achievement: {a[1]} (+${a[3]})', 'ok')
+                self.add_log(_fmt('Achievement: {} (+${})', a[1], a[3]), 'ok')
                 return a
         return False
 
@@ -283,24 +284,24 @@ class Game:
                 m['done'] = True
                 self.money += m['reward']
                 self.score += m['reward'] * 2
-                self.add_log(f'Missione: {m["desc"]} (+${m["reward"]})', 'ok')
-                self.add_news('Contratto completato: {t}', t=m['desc'])
+                self.add_log(_fmt('Mission: {} (+${})', m["desc"], m["reward"]), 'ok')
+                self.add_news(_('Contract completed: {t}'), t=m['desc'])
             elif m['type'] == 'crack' and self.server(m['target']):
                 s = self.server(m['target'])
                 if s['cracked'].get(m['port']):
                     m['done'] = True
                     self.money += m['reward']
                     self.score += m['reward'] * 2
-                    self.add_log(f'Missione: {m["desc"]} (+${m["reward"]})', 'ok')
-                    self.add_news('Contratto completato: {t}', t=m['desc'])
+                    self.add_log(_fmt('Mission: {} (+${})', m["desc"], m["reward"]), 'ok')
+                    self.add_news(_('Contract completed: {t}'), t=m['desc'])
             elif m['type'] == 'intel':
                 for ii in self.gov_intel:
                     if ii.get('server_name') == m['target']:
                         m['done'] = True
                         self.money += m['reward']
                         self.score += m['reward'] * 2
-                        self.add_log(f'Missione: {m["desc"]} (+${m["reward"]})', 'ok')
-                        self.add_news('Contratto completato: {t}', t=m['desc'])
+                        self.add_log(_fmt('Mission: {} (+${})', m["desc"], m["reward"]), 'ok')
+                        self.add_news(_('Contract completed: {t}'), t=m['desc'])
                         break
 
     # ── Story missions ──
@@ -340,14 +341,14 @@ class Game:
             self.story_progress[sm['id']] = True
             self.money += sm['reward']
             self.score += sm['reward'] * 2
-            self.add_log(f'📜 STORY: {sm["name"]} completata! (+${sm["reward"]})', 'ok')
-            self.add_news('Legenda hacker: {n} — missione compiuta!', n=sm['name'])
+            self.add_log(_fmt('📜 STORY: {} completed! (+${})', sm["name"], sm["reward"]), 'ok')
+            self.add_news(_('Hacker Legend: {n} — mission accomplished!'), n=sm['name'])
             self.story_active += 1
             self.notify(f'📜 {sm["name"]} — ${sm["reward"]}')
             if self.story_active < len(STORY_MISSIONS):
-                self.add_log(f'Prossima missione: {STORY_MISSIONS[self.story_active]["name"]}', 'info')
+                self.add_log(_fmt('Next mission: {}', STORY_MISSIONS[self.story_active]["name"]), 'info')
             else:
-                self.add_log('🏆 TUTTE LE LEGGENDE COMPLETATE! Sei una vera icona dell\'hacking!', 'ok')
+                self.add_log(_('🏆 ALL LEGENDS COMPLETED! You are a true hacking icon!'), 'ok')
                 self.money += 50000
                 self.score += 100000
                 self.notify('🏆 LEGEND COMPLETE! +$50,000')
@@ -375,14 +376,14 @@ class Game:
             self.hackback_cooldown = 5
             loss = min(self.money, int(100 + random.random() * self.level * 50))
             self.money -= loss
-            msg = f'HACKBACK! Un server nemico ha rubato ${loss}'
+            msg = _fmt('HACKBACK! An enemy server stole ${}', loss)
             if self.local_files and random.random() < 0.3:
                 idx = random.randint(0, len(self.local_files) - 1)
                 gone = self.local_files.pop(idx) if self.local_files else None
                 if gone:
-                    msg += f' e cancellato "{gone["name"]}"'
+                    msg += _fmt(' and deleted "{}"', gone["name"])
                 return msg
-            return f'HACKBACK! Un server nemico ha prelevato ${loss}!'
+            return _fmt('HACKBACK! An enemy server withdrew ${}!', loss)
         return None
 
     # ── Black market ──
@@ -396,11 +397,11 @@ class Game:
                 'decrypt_tool': 400, 'worm': 600,
             }
             descs = {
-                'exploit': 'Zero-day exploit (crack istantaneo)',
-                'fake_ip': 'IP fasullo (-5% trace su azioni)',
-                'scanner': 'Scanner avanzato (trova tutte le porte)',
-                'decrypt_tool': 'Decifratura istantanea',
-                'worm': 'Auto-spreading worm (hack automatico)',
+                'exploit': _('Zero-day exploit (instant crack)'),
+                'fake_ip': _('Fake IP (-5% trace on actions)'),
+                'scanner': _('Advanced scanner (finds all ports)'),
+                'decrypt_tool': _('Instant decryption'),
+                'worm': _('Auto-spreading worm (automatic hack)'),
             }
             items.append({
                 'type': t, 'name': t.replace('_', ' ').title(),
@@ -408,9 +409,9 @@ class Game:
             })
         items.append({
             'type': 'burner_phone',
-            'name': 'GSM Cellulare Usa e Getta',
+            'name': _('GSM Burner Phone'),
             'cost': 200 * self.level,
-            'desc': 'Telefono anonimo cifrato (-30% trace su prossima azione)',
+            'desc': _('Encrypted anonymous phone (-30% trace on next action)'),
         })
         self.black_market_items = items
 

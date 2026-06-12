@@ -19,7 +19,7 @@
   ["hq.pentagon.mil",          [443,2222],2048,[["strike_plans","# STRIKE: OPERATION NIGHTFALL"],["troop_movement","# TROOP DEPLOYMENT"]],0,"Pentagon HQ"],
   ["sat.nato.int",             [21,443],  1024, [["satellite_link","# SATCOM: NATO-7\n# STATUS: ACTIVE"],["target_coords","# TARGET COORDINATES"]],0,"NATO satellite command"],
   ["grid.dhs.homeland.gov",    [443,8080],512, [["threat_matrix","# THREAT LEVEL: ELEVATED"],["infrastructure","# CRITICAL INFRA"]],0,"DHS threat grid"],
-  ["nexus-core.darknet",       [443,2222,9999],4096,[["overwatch_db","# NEXUS CORE DATABASE\n# CONTRACTS, TRANSACTIONS, COVERUPS"],["switch_protocol","# PROTOCOL: INTERRUTTORE\n# Una scelta. Permanente."]],0,"Nexus mainframe"],
-  ["social.linkedin.fake",     [80,443],128, [["darius_profile","# Profilo LinkedIn Darius\n# Ex CTO Nexus Corp — 2018-2026"],["connections","# Lista contatti: direttori CIA, NSA, ONU"]],0,"Social network"],
-  ["db.personal.nexus.net",    [443],256, [["private_messages","# Messaggi privati Darius\n# \"Sanno che ho scoperto tutto.\""],["location_history","# Cronologia posizioni\n# 14 Mar: ultimo accesso"]],0,"Database personale"]
+  ["nexus-core.darknet",       [443,2222,9999],4096,[["overwatch_db","# NEXUS CORE DATABASE\n# CONTRACTS, TRANSACTIONS, COVERUPS"],["switch_protocol","# PROTOCOL: SWITCH\n# One choice. Permanent."]],0,"Nexus mainframe"],
+  ["social.linkedin.fake",     [80,443],128, [["darius_profile","# Darius LinkedIn Profile\n# Former CTO Nexus Corp — 2018-2026"],["connections","# Connection list: CIA, NSA, UN directors"]],0,"Social network"],
+  ["db.personal.nexus.net",    [443],256, [["private_messages","# Darius private messages\n# \"They know I've discovered everything.\""],["location_history","# Location history\n# 14 Mar: last access"]],0,"Database personale"]
 ]

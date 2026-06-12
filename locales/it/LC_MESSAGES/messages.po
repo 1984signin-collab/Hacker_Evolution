@@ -1,0 +1,1329 @@
+# HACKER EVOLUTION — Italian Translation
+# Copyright (C) 2026 404 Fun Not Found
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HACKER EVOLUTION 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-12 12:00+0000\n"
+"PO-Revision-Date: 2026-06-12 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Italian <it@li.org>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+
+msgid ""
+"\n"
+"[+] Server FOUND: {}\n"
+msgstr ""
+"\n"
+"[+] Server TROVATO: {}\n"
+
+msgid ""
+"\n"
+"{}\n"
+msgstr ""
+
+msgid ""
+"\n"
+"── {}:{} ──\n"
+msgstr ""
+
+msgid ""
+"\n"
+"📧 YOU HAVE 1 NEW EMAIL from Darius. Type EMAIL to read it.\n"
+msgstr ""
+"\n"
+"📧 HAI 1 NUOVA EMAIL da Darius. Digita EMAIL per leggerla.\n"
+
+msgid "       {}"
+msgstr ""
+
+msgid "    Key: {} bits"
+msgstr "    Chiave: {} bits"
+
+msgid "    Ports: {}"
+msgstr "    Porte: {}"
+
+msgid "    Sell on black market with SELLINTEL <id>"
+msgstr "    Vendi al mercato nero con SELLINTEL <id>"
+
+msgid "    Status: {}"
+msgstr "    Stato: {}"
+
+msgid "  (Level {})"
+msgstr "  (Livello {})"
+
+msgid "  --- statistics ---"
+msgstr "  --- statistics ---"
+
+msgid "  2.4 billion profiles. 12,847 illegal transactions."
+msgstr "  2.4 miliardi di profili. 12.847 transazioni illegali."
+
+msgid "  34 governments. 7 murders. 12 manipulated elections."
+msgstr "  34 governi. 7 omicidi. 12 elezioni manipolate."
+
+msgid "  BUY  "
+msgstr ""
+
+msgid "  Bounces used:         {}"
+msgstr "  Bounce usati:         {}"
+
+msgid "  CLOSE  "
+msgstr "  CHIUDI  "
+
+msgid "  Coins: BTC, ETH, XMR"
+msgstr "  Coins: BTC, ETH, XMR"
+
+msgid "  EVERYTHING ONLINE. EVERYTHING VISIBLE. FOREVER."
+msgstr "  TUTTO ONLINE. TUTTO VISIBILE. PER SEMPRE."
+
+msgid "  Every trace. Every proof. Every name."
+msgstr "  Ogni traccia. Ogni prova. Ogni nome."
+
+msgid "  F2=Objectives  F5=Missions  F6=Achievement  F7=News"
+msgstr "  F2=Obiettivi  F5=Missioni  F6=Achievement  F7=Notizie"
+
+msgid "  Hack attempts:    {}"
+msgstr "  Tentativi di hack:    {}"
+
+msgid "  Hacked servers:     {}/{}"
+msgstr "  Server hackerati:     {}/{}"
+
+msgid "  Key: {}b  Money: ${}  Files: {}"
+msgstr ""
+
+msgid "  Level:              {}"
+msgstr "  Livello:              {}"
+
+msgid "  Level: {}  |  Achievement: {}/{}"
+msgstr "  📈 Livello: {}  |  🏆 Achievement: {}/{}"
+
+msgid "  Max trace:        {:.1f}%"
+msgstr "  Trace massima:        {:.1f}%"
+
+msgid "  Missions completed:  {}"
+msgstr "  Missioni completate:  {}"
+
+msgid "  Missions: {}/{} completed"
+msgstr "  📋 Missioni: {}/{} completate"
+
+msgid "  Money stolen:         ${:,}"
+msgstr "  Soldi rubati:         ${:,}"
+
+msgid "  Money: ${:,}  |  Score: {}"
+msgstr "  💰 Soldi: ${:,}  |  Score: {}"
+
+msgid "  NEXUS CORPORATION DATABASE DELETED"
+msgstr "  DATABASE NEXUS CORPORATION CANCELLATO"
+
+msgid "  NEXUS CORPORATION DATABASE MADE PUBLIC"
+msgstr "  DATABASE NEXUS CORPORATION RESO PUBBLICO"
+
+msgid "  No one will ever know what happened."
+msgstr "  Nessuno saprà mai cosa è successo."
+
+msgid "  ONE CHOICE. NO TURNING BACK."
+msgstr "  UNA SCELTA. NESSUN DIETROFRONT."
+
+msgid "  Packets: sent=4 received=4 lost=0"
+msgstr "  Pacchetti: inviati=4 ricevuti=4 persi=0"
+
+msgid "  Play time:          --"
+msgstr "  Tempo gioco:          --"
+
+msgid "  Port {}: {}"
+msgstr "  Porta {}: {}"
+
+msgid "  Reply from {}: bytes=64 time={}ms TTL={}"
+msgstr "  Risposta da {}: byte=64 tempo={}ms TTL={}"
+
+msgid "  SELL  "
+msgstr ""
+
+msgid "  SIGN IN  "
+msgstr "  ACCEDI  "
+
+msgid "  Score:                {:,}"
+msgstr "  Score:                {:,}"
+
+msgid "  Status: {}"
+msgstr ""
+
+msgid "  Subject: {}"
+msgstr "  Oggetto: {}"
+
+msgid "  The truth buried with Darius. Forever."
+msgstr "  La verità sepolta con Darius. Per sempre."
+
+msgid "  Total crypto wallet: ${:,.0f}"
+msgstr "  Totale portafoglio crypto: ${:,.0f}"
+
+msgid "  Total money:         ${:,}"
+msgstr "  Soldi totali:         ${:,}"
+
+msgid "  Transfers:        {}"
+msgstr "  Trasferimenti:        {}"
+
+msgid "  Use: BUYCRYPTO <coin> <amount>  |  SELLCRYPTO <coin> <amount>"
+msgstr "  Usa: BUYCRYPTO <coin> <amount>  |  SELLCRYPTO <coin> <amount>"
+
+msgid "  YOU HAVE ACCESS TO THE MAIN SWITCH."
+msgstr "  HAI ACCESSO ALL'INTERRUTTORE PRINCIPALE."
+
+msgid "  [{}] {} — ${:,}"
+msgstr ""
+
+msgid "  {:2}  {:<15} {}ms"
+msgstr ""
+
+msgid "  {:2}  {}  *"
+msgstr ""
+
+msgid "  {:>4}  ${:>6,}  QTY: {:.4f}  VAL: ${:,.0f}"
+msgstr ""
+
+msgid "  {}"
+msgstr ""
+
+msgid "  {} {:<20} {:<30} {}"
+msgstr ""
+
+msgid "  {} {:<45} ${}"
+msgstr ""
+
+msgid "  {} → {}"
+msgstr ""
+
+msgid "  {}. {}"
+msgstr ""
+
+msgid "  ⚠ Trace: {:.1f}%"
+msgstr ""
+
+msgid "  📊 Hacked servers: {}/{}"
+msgstr ""
+
+msgid "  🔁 Bounce hop: {}"
+msgstr ""
+
+msgid " and deleted \"{}\""
+msgstr " e cancellato \"{}\""
+
+msgid "+20% crack speed per level"
+msgstr ""
+
+msgid "+30% crypto profit per level"
+msgstr ""
+
+msgid "-10% trace per action per level"
+msgstr ""
+
+msgid "-5% trace taken per level"
+msgstr ""
+
+msgid "3D View — {}"
+msgstr "Vista 3D — {}"
+
+msgid "> {}"
+msgstr ""
+
+msgid "ACHIEVEMENTS"
+msgstr ""
+
+msgid "ACTIVE"
+msgstr "ATTIVA"
+
+msgid "ACTIVE MISSIONS"
+msgstr "MISSIONI ATTIVE"
+
+msgid "AVAILABLE"
+msgstr "DISPONIBILE"
+
+msgid "Achievement: {} (+${})"
+msgstr ""
+
+msgid "Active aliases:"
+msgstr "Alias attivi:"
+
+msgid "Advanced scanner (finds all ports)"
+msgstr ""
+
+msgid "Alias {} removed."
+msgstr "Alias {} rimosso."
+
+msgid "Alias: {} → {}"
+msgstr "Alias: {} → {}"
+
+msgid "Auto-spreading worm (automatic hack)"
+msgstr ""
+
+msgid "Available points: {}"
+msgstr "Punti disponibili: {}"
+
+msgid "BOUNCE HELP"
+msgstr "BOUNCE HELP"
+
+msgid "BUY"
+msgstr ""
+
+msgid "Bought {:.4f} {} for ${:,.0f}"
+msgstr "Comprati {:.4f} {} per ${:,.0f}"
+
+msgid "Bounced links increase trace time."
+msgstr "I bounced link aumentano il tempo di trace."
+
+msgid "CLASSIFIED — {}"
+msgstr "CLASSIFICATO — {}"
+
+msgid "CLOSE PORT"
+msgstr "CHIUDI PORTA"
+
+msgid "CLOSE to return to terminal"
+msgstr "CHIUDI per tornare al terminale"
+
+msgid "COMPLETED"
+msgstr "COMPLETATA"
+
+msgid "CRYPTOCURRENCIES"
+msgstr "CRYPTOVALUTE"
+
+msgid "Cancel"
+msgstr "Annulla"
+
+msgid "Cancelled."
+msgstr "Annullato."
+
+msgid "Chain ({} hop):"
+msgstr "Catena ({} hop):"
+
+msgid "Classification: TOP SECRET // {}"
+msgstr ""
+
+msgid "Close"
+msgstr "Chiudi"
+
+msgid "Completed: {}/{}"
+msgstr "Completate: {}/{}"
+
+msgid "Connected on port {}"
+msgstr "Connesso su porta {}"
+
+msgid "Contract completed: {t}"
+msgstr ""
+
+msgid "Crack {}:{} first"
+msgstr "Cracka prima {}:{}"
+
+msgid "Crack: {}:{}"
+msgstr "Crack: {}:{}"
+
+msgid "Crypto purchase: {a:.2f} {c}"
+msgstr "Acquisto crypto: {a:.2f} {c}"
+
+msgid "DETAILED STATISTICS"
+msgstr "STATISTICHE DETTAGLIATE"
+
+msgid "Decrypt {} first"
+msgstr "Decifra prima {}"
+
+msgid "Decrypt: {}"
+msgstr "Decrypt: {}"
+
+msgid "Decrypting key {} bits..."
+msgstr "Decifratura chiave {} bits..."
+
+msgid "Description"
+msgstr "Descrizione"
+
+msgid "Disconnect first."
+msgstr "Disconnettiti prima."
+
+msgid "Disconnected from {}"
+msgstr "Disconnesso da {}"
+
+msgid "Empty chain."
+msgstr "Catena vuota."
+
+msgid "Encrypted anonymous phone (-30% trace on next action)"
+msgstr ""
+
+msgid "Exploit not found."
+msgstr "Exploit non trovato."
+
+msgid "Exploit {e} deployed on {h}"
+msgstr "Exploit {e} deployed su {h}"
+
+msgid "Exported: {}"
+msgstr "Esportato: {}"
+
+msgid "FILTERED"
+msgstr "FILTRATA"
+
+msgid "Fake IP (-5% trace on actions)"
+msgstr ""
+
+msgid "Fake IP active - trace reduced"
+msgstr ""
+
+msgid "File not found locally: {}"
+msgstr "File non trovato in locale: {}"
+
+msgid "File not found."
+msgstr "File non trovato."
+
+msgid "File not found: {}"
+msgstr "File non trovato: {}"
+
+msgid "Funds transferred: ${a} from {h}"
+msgstr "Fondi trasferiti: ${a} da {h}"
+
+msgid "GAME OVER - Trace 100%"
+msgstr "GAME OVER - Trace 100%"
+
+msgid "GSM Burner Phone"
+msgstr ""
+
+msgid "Game loaded!"
+msgstr "Partita caricata!"
+
+msgid "Game saved!"
+msgstr "Partita salvata!"
+
+msgid "Generated {} missions."
+msgstr "Generate {} missioni."
+
+msgid "Generated {} new missions!"
+msgstr "Generate {} nuove missioni!"
+
+msgid "HACKBACK! An enemy server stole ${}"
+msgstr "HACKBACK! Un server nemico ha rubato ${}"
+
+msgid "HACKBACK! An enemy server withdrew ${}!"
+msgstr "HACKBACK! Un server nemico ha prelevato ${}!"
+
+msgid "Hack government servers to steal intel."
+msgstr ""
+
+msgid "Hacker Legend: {n} — mission accomplished!"
+msgstr ""
+
+msgid "ID {} not found. Use INTEL for list."
+msgstr "ID {} non trovato. Usa INTEL per la lista."
+
+msgid "Imported!"
+msgstr "Importato!"
+
+msgid "Instant decryption"
+msgstr ""
+
+msgid "Intel already extracted from this server."
+msgstr "Intel già estratto da questo server."
+
+msgid "Intel {i} sold on black market (+${p})"
+msgstr "Intel {i} venduto al mercato nero (+${p})"
+
+msgid "Intelligence Date: {}-{:02d}-{:02d}"
+msgstr ""
+
+msgid "Invalid ID."
+msgstr "ID non valido."
+
+msgid "Invalid amount."
+msgstr "Importo non valido."
+
+msgid "Invalid coin. BTC, ETH, XMR"
+msgstr "Coin non valida. BTC, ETH, XMR"
+
+msgid "Invalid file."
+msgstr "File non valido."
+
+msgid "Invalid port."
+msgstr "Porta non valida."
+
+msgid "Key decrypted for {h}"
+msgstr "Chiave decifrata per {h}"
+
+msgid "LOCKED"
+msgstr "BLOCCATA"
+
+msgid "LVL {}"
+msgstr "LVL {}"
+
+msgid "LVL {}/{}"
+msgstr "LVL {}/{}"
+
+msgid "Language changes require a restart."
+msgstr "Il cambio lingua richiede un riavvio."
+
+msgid "Language set to {}. Restarting..."
+msgstr "Lingua impostata a {}. Riavvio..."
+
+msgid "Level {lvl} unlocked — new targets available"
+msgstr "Livello {lvl} sbloccato — nuovi target disponibili"
+
+msgid "Level {} started!"
+msgstr "Livello {} iniziato!"
+
+msgid "Logs deleted. Trace: {:.1f}%"
+msgstr "Log cancellati. Trace: {:.1f}%"
+
+msgid "MAX ✓"
+msgstr "MAX ✓"
+
+msgid "Market Value: ${:,}"
+msgstr ""
+
+msgid "Max 3 bounces per server."
+msgstr "Max 3 rimbalzi per server."
+
+msgid "Memory full!"
+msgstr "Memoria piena!"
+
+msgid "Memory:"
+msgstr "Memoria:"
+
+msgid "Mission"
+msgstr "Missione"
+
+msgid "Mission: {} (+${})"
+msgstr ""
+
+msgid "Money:"
+msgstr "Soldi:"
+
+msgid "Money: ${:,}"
+msgstr "Soldi: ${:,}"
+
+msgid "Moving to next level..."
+msgstr "Passando al livello successivo..."
+
+msgid "NEXUS Core — Switch"
+msgstr "Switch Nexus Core"
+
+msgid "Narrative ending: {}"
+msgstr ""
+
+msgid "Need $500."
+msgstr "Servono $500."
+
+msgid "Need ${:,.0f}"
+msgstr "Servono ${:,.0f}"
+
+msgid "New game started."
+msgstr "Nuova partita iniziata."
+
+msgid "Next mission: {}"
+msgstr ""
+
+msgid "No active missions. Type NEWMISSION to generate."
+msgstr "Nessuna missione attiva. Digita NEWMISSION per generarli."
+
+msgid "No aliases."
+msgstr "Nessun alias."
+
+msgid "No emails from Darius."
+msgstr "Nessuna email da Darius."
+
+msgid "No intelligence to sell."
+msgstr ""
+
+msgid "No save found."
+msgstr "Nessun salvataggio trovato."
+
+msgid "No stolen intelligence."
+msgstr "Nessuna intelligence rubata."
+
+msgid "No valid combination. Try exploit + bin."
+msgstr "Nessuna combinazione valida. Prova exploit + bin."
+
+msgid "Not connected to a server."
+msgstr "Non connesso a un server."
+
+msgid "Not connected."
+msgstr "Non connesso."
+
+msgid "OBJECTIVES"
+msgstr "OBIETTIVI"
+
+msgid "OFF"
+msgstr ""
+
+msgid "ON"
+msgstr ""
+
+msgid "OPEN"
+msgstr "APERTA"
+
+msgid "OVERWATCH — GLOBAL SURVEILLANCE SYSTEM"
+msgstr "OVERWATCH — SISTEMA DI SORVEGLIANZA GLOBALE"
+
+msgid "PING {}..."
+msgstr "PING {}..."
+
+msgid "Password:"
+msgstr "Password:"
+
+msgid "Port {} not found"
+msgstr "Porta {} non trovata"
+
+msgid "Portal Login — {}"
+msgstr "Login Portale — {}"
+
+msgid "Recent news:"
+msgstr "Notizie recenti:"
+
+msgid "Reward"
+msgstr "Ricompensa"
+
+msgid "SCHEMATIC — Network Grid"
+msgstr "SCHEMATIC — Reticolo Rete"
+
+msgid "SECURE ACCESS PORTAL  |  Classification Level: TOP SECRET"
+msgstr ""
+
+msgid "SECURE LOGIN"
+msgstr "ACCESSO SICURO"
+
+msgid "SELL"
+msgstr ""
+
+msgid "Scan {} first"
+msgstr "Scansiona prima {}"
+
+msgid "Scanning ports on {}..."
+msgstr "Scansione porte su {}..."
+
+msgid "Server breached! {h}:{p} compromised."
+msgstr "Server violato! {h}:{p} compromesso."
+
+msgid "Server only has ${}"
+msgstr "Il server ha solo ${}"
+
+msgid "Server: {}"
+msgstr "Server: {}"
+
+msgid "Settings are saved automatically."
+msgstr "Le impostazioni vengono salvate automaticamente."
+
+msgid "Sold {:.4f} {} for ${:,}"
+msgstr "Venduti {:.4f} {} per ${:,}"
+
+msgid "Sound: {}"
+msgstr "Suono: {}"
+
+msgid "Source: {}"
+msgstr ""
+
+msgid "Status"
+msgstr "Stato"
+
+msgid "System online. Darius legacy active."
+msgstr "System online. Darius legacy attivo."
+
+msgid "TOP SECRET // {} // {}"
+msgstr "TOP SECRET // {} // {}"
+
+msgid "TRACED!"
+msgstr "TRACED!"
+
+msgid "Trace multiplier: {}x"
+msgstr "Trace multiplier: {}x"
+
+msgid "Trace reduced to {:.1f}% (-$500)"
+msgstr "Trace ridotto a {:.1f}% (-$500)"
+
+msgid "Trace time = base × (hop+1) × firewall bonus"
+msgstr "Trace time = base × (hop+1) × firewall bonus"
+
+msgid "Trace:"
+msgstr "Trace:"
+
+msgid "Traceroute to {}..."
+msgstr "Traceroute verso {}..."
+
+msgid "Transfer: ${}"
+msgstr "Transfer: ${}"
+
+msgid "Type HELP for commands."
+msgstr "Digita HELP per i comandi."
+
+msgid "Unknown command: {}. Type HELP."
+msgstr "Comando sconosciuto: {}. Digita HELP."
+
+msgid "Unknown host: {}"
+msgstr "Host sconosciuto: {}"
+
+msgid "Unknown: {}"
+msgstr "Sconosciuto: {}"
+
+msgid "Unlock phishing attack"
+msgstr ""
+
+msgid "Upgrade: {} -> LVL {}"
+msgstr ""
+
+msgid "Use BOUNCE <host> to add hacked servers."
+msgstr "Usa BOUNCE <host> per aggiungere server hackerati."
+
+msgid "Use NEWMISSION for new missions."
+msgstr "Usa NEWMISSION per nuove missioni."
+
+msgid "Use SELLINTEL <id> to sell on the black market."
+msgstr "Usa SELLINTEL <id> per vendere al mercato nero."
+
+msgid "Use SOUND command in terminal to toggle quickly."
+msgstr "Usa il comando SOUND nel terminale per attivare/disattivare rapidamente."
+
+msgid "Use: BOUNCE <host>"
+msgstr "Usa: BOUNCE <host>"
+
+msgid "Use: BUYCRYPTO <coin> <amount>"
+msgstr "Usa: BUYCRYPTO <coin> <amount>"
+
+msgid "Use: CAT <file>"
+msgstr "Usa: CAT <file>"
+
+msgid "Use: COMBINE <file1> <file2>"
+msgstr "Usa: COMBINE <file1> <file2>"
+
+msgid "Use: CONNECT <host> [port]"
+msgstr "Usa: CONNECT <host> [port]"
+
+msgid "Use: CRACK <host> [port]"
+msgstr "Usa: CRACK <host> [port]"
+
+msgid "Use: DECRYPT <host>"
+msgstr "Usa: DECRYPT <host>"
+
+msgid "Use: DELETE <file>"
+msgstr "Usa: DELETE <file>"
+
+msgid "Use: DOWNLOAD <file>"
+msgstr "Usa: DOWNLOAD <file>"
+
+msgid "Use: EXEC <exploit> <host>"
+msgstr "Usa: EXEC <exploit> <host>"
+
+msgid "Use: LOGIN <host> <password>"
+msgstr "Usa: LOGIN <host> <password>"
+
+msgid "Use: PING <host>"
+msgstr "Usa: PING <host>"
+
+msgid "Use: SCAN <host>"
+msgstr "Usa: SCAN <host>"
+
+msgid "Use: SCANPORTS <host>"
+msgstr "Usa: SCANPORTS <host>"
+
+msgid "Use: SELLCRYPTO <coin> <amount>"
+msgstr "Usa: SELLCRYPTO <coin> <amount>"
+
+msgid "Use: SELLINTEL <id>  (see INTEL for list)"
+msgstr "Usa: SELLINTEL <id>  (vedi INTEL per la lista)"
+
+msgid "Use: TRACEROUTE <host>"
+msgstr "Usa: TRACEROUTE <host>"
+
+msgid "Use: TRANSFER <amount>"
+msgstr "Usa: TRANSFER <amount>"
+
+msgid "Use: UNALIAS <name>"
+msgstr "Usa: UNALIAS <nome>"
+
+msgid "Use: UPLOAD <file>"
+msgstr "Usa: UPLOAD <file>"
+
+msgid "Username:"
+msgstr "Nome utente:"
+
+msgid "WARNING: Trace at {t:.0f}% — suspicious activity detected!"
+msgstr "ALLARME: Trace al {t:.0f}% — attività sospetta rilevata!"
+
+msgid "Wrong password."
+msgstr "Password errata."
+
+msgid "You already made a choice."
+msgstr "Hai già preso una decisione."
+
+msgid "You cannot modify bounce while connected."
+msgstr "Non puoi modificare il bounce mentre sei connesso."
+
+msgid "You must complete all legend missions first."
+msgstr "Devi completare tutte le missioni leggenda prima."
+
+msgid "You only have {:.4f} {}"
+msgstr "Hai solo {:.4f} {}"
+
+msgid "Zero-day exploit (instant crack)"
+msgstr ""
+
+msgid "[+] Access to {}:{}"
+msgstr "[+] Accesso a {}:{}"
+
+msgid "[+] Connected to {}:{}"
+msgstr "[+] Connesso a {}:{}"
+
+msgid "[+] Created {} from {} + {}!"
+msgstr "[+] Creato {} dai file {} + {}!"
+
+msgid "[+] INTELLIGENCE EXTRACTED: {} (value ${:,})"
+msgstr "[+] INTELLIGENCE ESTRATTA: {} (valore ${:,})"
+
+msgid "[+] Intelligence sold: {} for ${:,}"
+msgstr "[+] Intelligence venduta: {} per ${:,}"
+
+msgid "[+] Key DECRYPTED on {}!"
+msgstr "[+] Chiave DECIFRATA su {}!"
+
+msgid "[+] Password CRACKED on {}:{}!"
+msgstr "[+] Password CRACKATA su {}:{}!"
+
+msgid "[+] Purchased: {}"
+msgstr "[+] Acquistato: {}"
+
+msgid "[+] Skill {} upgraded!"
+msgstr "[+] Skill {} potenziata!"
+
+msgid "[+] Transferred ${}"
+msgstr "[+] Trasferiti ${}"
+
+msgid "[+] {} upgraded to LVL {}!"
+msgstr "[+] {} aggiornato a LVL {}!"
+
+msgid "[-] Host not found: {}"
+msgstr "[-] Host non trovato: {}"
+
+msgid "[GSM] Burner phone purchased. Use it for covert ops."
+msgstr "[GSM] Cellulare usa e getta acquistato. Usalo per operazioni coperte."
+
+msgid "[MAP] {}  Ports: {}  Bounce: {}/3"
+msgstr ""
+
+msgid "[bold green]Completed:[/] {}/{}"
+msgstr "[bold green]Completate:[/] {}/{}"
+
+msgid "[bold yellow]AVAILABLE COMMANDS[/]"
+msgstr "[bold yellow]COMANDI DISPONIBILI[/]"
+
+msgid "[bold yellow]HACKER LEGEND MISSIONS[/]"
+msgstr "[bold yellow]MISSIONI LEGGENDE HACKER[/]"
+
+msgid "[bold yellow]HARDWARE CONFIG[/]"
+msgstr ""
+
+msgid "[bold yellow]SERVER ({len(g.servers)})[/]"
+msgstr ""
+
+msgid "[bold yellow]{}[/]"
+msgstr ""
+
+msgid "[dim]{}[/]"
+msgstr ""
+
+msgid "[green]{}[/]"
+msgstr ""
+
+msgid "[{}] {}"
+msgstr "[{}] {}"
+
+msgid "{} added to bounce. ({} hop)"
+msgstr "{} aggiunto al bounce. ({} hop)"
+
+msgid "{} already decrypted."
+msgstr "{} già decifrato."
+
+msgid "{} deleted."
+msgstr "{} eliminato."
+
+msgid "{} has no bounces left."
+msgstr "{} ha finito i rimbalzi."
+
+msgid "{} not hacked."
+msgstr "{} non hackerato."
+
+msgid "{} removed from bounce."
+msgstr "{} rimosso dal bounce."
+
+msgid "── LOCAL ({}/{} blocks) ──"
+msgstr "── LOCALE ({}/{} blocks) ──"
+
+msgid "═══ LEVEL {} ═══"
+msgstr ""
+
+msgid "═══ NEW GAME ═══"
+msgstr ""
+
+msgid "╔══ BLACK MARKET ══╗"
+msgstr ""
+
+msgid "╔══ CONFIGURATION ══╗"
+msgstr ""
+
+msgid "╔══ NEXUS CORE MAINFRAME ══╗"
+msgstr "╔══ NEXUS CORE MAINFRAME ══╗"
+
+msgid "╔══ SKILL TREE ══╗"
+msgstr "╔══ SKILL TREE ══╗"
+
+msgid "╔══ UPGRADE HARDWARE ══╗"
+msgstr "╔══ AGGIORNA HARDWARE ══╗"
+
+msgid "⚙ Settings"
+msgstr ""
+
+msgid ""
+"⚠  WARNING: This system is for authorized use only. All access is monitored "
+"and logged.  ⚠"
+msgstr ""
+"⚠  ATTENZIONE: Questo sistema è solo per uso autorizzato. Tutti gli accessi "
+"sono monitorati e registrati.  ⚠"
+
+msgid "⚠ {}"
+msgstr ""
+
+msgid "⚠️ TRACE 100%! GAME OVER!"
+msgstr "⚠️ TRACE 100%! GAME OVER!"
+
+msgid "✓  Intel already extracted."
+msgstr "✓  Intel già estratto."
+
+msgid "✗  Access denied. Invalid credentials."
+msgstr ""
+
+msgid "✗  Enter username and password."
+msgstr ""
+
+msgid "✗  Password too short."
+msgstr ""
+
+msgid "⬆ UP"
+msgstr "⬆ AGGIORNA"
+
+msgid "⬇  EXTRACT INTELLIGENCE  ⬇"
+msgstr "⬇  ESTRAI INTELLIGENCE  ⬇"
+
+msgid "🇺🇸  DEPARTMENT OF {}"
+msgstr "🇺🇸  DIPARTIMENTO DI {}"
+
+msgid "🇺🇸  UNITED STATES GOVERNMENT"
+msgstr "🇺🇸  GOVERNO DEGLI STATI UNITI"
+
+msgid "🌐 Language"
+msgstr ""
+
+msgid "🏆 ALL LEGENDS COMPLETED! You are a true hacking icon!"
+msgstr ""
+
+msgid "🏆 Achievement unlocked: {} (+${})"
+msgstr "🏆 Achievement sbloccato: {} (+${})"
+
+msgid "💰 ${:,}"
+msgstr "💰 ${:,}"
+
+msgid "💰 Money"
+msgstr ""
+
+msgid "📁  {}"
+msgstr "📁  {}"
+
+msgid "📁 STOLEN INTELLIGENCE"
+msgstr "📁 INTELLIGENCE RUBATE"
+
+msgid "📜 STORY UNLOCKED: {} (type STORY)"
+msgstr "📜 STORY SBLOCCATA: {} (digita STORY)"
+
+msgid "📜 STORY: {} completed! (+${})"
+msgstr ""
+
+msgid "📜 {} unlocked!"
+msgstr "📜 {} sbloccata!"
+
+msgid "📧 EMAIL — Darius"
+msgstr "📧 EMAIL — Darius"
+
+msgid "📧 NEW EMAIL: {} (type EMAIL)"
+msgstr "📧 NUOVA EMAIL: {} (digita EMAIL)"
+
+msgid "🔊 Sound"
+msgstr ""
+
+msgid "🔒  Connection: TLS 1.3  |  Session: {}  |  PKI: DoD CA-5"
+msgstr ""
+
+msgid "🔒  DELETE EVERYTHING FOREVER"
+msgstr "🔒  CANCELLA TUTTO PER SEMPRE"
+
+msgid "🔒 DATABASE DESTROYED. The truth is silent."
+msgstr "🔒 DATABASE DISTRUTTO. La verità tace."
+
+msgid "🔓  RELEASE EVERYTHING TO THE PUBLIC"
+msgstr "🔓  RENDI TUTTO PUBBLICO"
+
+msgid "🔓 DATABASE PUBLISHED! +$100,000"
+msgstr "🔓 DATABASE PUBBLICATO! +$100,000"
+
+msgid "🔔 Trace Alarm"
+msgstr ""
+
+msgid "🔧 Hardware Upgrade"
+msgstr "🔧 Aggiornamento Hardware"
+
+msgid "🕶 Black Market"
+msgstr ""
+
+msgid "🧠 Skill Tree"
+msgstr "🧠 Skill Tree"
+
+msgid "  Hacked servers: {}/{}"
+msgstr "  Server hackerati: {}/{}"
+
+msgid "  Memory: {}/{} blk  Trace: {:.1f}%  Money: ${:,}"
+msgstr "  Memoria: {}/{} blk  Trace: {:.1f}%  Soldi: ${:,}"
+
+msgid " BOUNCE "
+msgstr " 🔁 BOUNCE "
+
+msgid " HACK "
+msgstr " 💻 Hack "
+
+msgid " HARDWARE "
+msgstr " HARDWARE "
+
+msgid " LEVEL "
+msgstr " 📊 Level "
+
+msgid " MESSAGES "
+msgstr " MESSAGES "
+
+msgid " MONEY "
+msgstr " 💰 Soldi "
+
+msgid " SCORE "
+msgstr " 🏆 Score "
+
+msgid " TRACE "
+msgstr " ⚠️ Trace "
+
+msgid " TRACED "
+msgstr " 🕵️ Traced "
+
+msgid " 🔒  DELETE EVERYTHING FOREVER"
+msgstr " 🔒  CANCELLA TUTTO PER SEMPRE"
+
+msgid " 🔓  RELEASE EVERYTHING TO THE PUBLIC"
+msgstr " 🔓  RENDI TUTTO PUBBLICO"
+
+msgid "-10% trace ($500)"
+msgstr "-10% trace ($500)"
+
+msgid "3D server view"
+msgstr "Vista 3D server"
+
+msgid "=== LEVEL {} ==="
+msgstr "=== LIVELLO {} ==="
+
+msgid "=== NEW GAME ==="
+msgstr "=== NUOVA PARTITA ==="
+
+msgid "AVAILABLE COMMANDS"
+msgstr "COMANDI DISPONIBILI"
+
+msgid "Active missions"
+msgstr "Missioni attive"
+
+msgid "Add/remove bounce"
+msgstr "Aggiungi/rimuovi bounce"
+
+msgid "All servers"
+msgstr "Tutti i server"
+
+msgid "Available languages: en (English), it (Italiano)"
+msgstr "Lingue disponibili: en (English), it (Italiano)"
+
+msgid "Black market"
+msgstr "Mercato nero"
+
+msgid "Bounce chain"
+msgstr "Catena bounce"
+
+msgid "Bounce help"
+msgstr "Aiuto bounce"
+
+msgid "Brute force password"
+msgstr "Forza password"
+
+msgid "Brute forcing {}:{}... ({} chars)"
+msgstr "Brute force su {}:{}... ({} chars)"
+
+msgid "Buy crypto"
+msgstr "Compra crypto"
+
+msgid "CONSOLE"
+msgstr "▶ CONSOLE"
+
+msgid "Completed:"
+msgstr "Completate:"
+
+msgid "Component"
+msgstr "Component"
+
+msgid "Connect"
+msgstr "Connettiti"
+
+msgid "Connection test"
+msgstr "Test connessione"
+
+msgid "Create alias"
+msgstr "Crea alias"
+
+msgid "Crypto market"
+msgstr "Mercato crypto"
+
+msgid "Crypto purchase: {:.2f} {}"
+msgstr "Acquisto crypto: {:.2f} {}"
+
+msgid "Current language: {}"
+msgstr "Lingua corrente: {}"
+
+msgid "DECRYPTED"
+msgstr "DECIFRATO"
+
+msgid "DEFENSE"
+msgstr "DIFESA"
+
+msgid "Decrypt key"
+msgstr "Decifra chiave"
+
+msgid "Delete"
+msgstr "Cancella"
+
+msgid "Delete server logs"
+msgstr "Cancella log server"
+
+msgid "Disconnect"
+msgstr "Disconnetti"
+
+msgid "Download"
+msgstr "Scarica"
+
+msgid "Download: {} ({}/{})"
+msgstr "Download: {} ({}/{})"
+
+msgid "ENCRYPTED"
+msgstr "CIFRATO"
+
+msgid "Effect"
+msgstr "Effect"
+
+msgid "Exit"
+msgstr "🚪 Esci"
+
+msgid "Export"
+msgstr "📤 Esporta"
+
+msgid "Export..."
+msgstr "📤 Esporta..."
+
+msgid "File"
+msgstr "File"
+
+msgid "Final switch (endgame only)"
+msgstr "Interruttore finale (solo endgame)"
+
+msgid "Find server"
+msgstr "Trova server"
+
+msgid "Generate missions"
+msgstr "Genera missioni"
+
+msgid "Glitch effect"
+msgstr "Effetto glitch"
+
+msgid "HACKER LEGEND MISSIONS"
+msgstr "MISSIONI LEGGENDE HACKER"
+
+msgid "HARDWARE CONFIG"
+msgstr "HARDWARE CONFIG"
+
+msgid "HOMELAND SECURITY"
+msgstr "SICUREZZA INTERNA"
+
+msgid "Hacker legend missions"
+msgstr "Missioni leggende hacker"
+
+msgid "Help"
+msgstr "Aiuto"
+
+msgid "Import"
+msgstr "📥 Importa"
+
+msgid "Import..."
+msgstr "📥 Importa..."
+
+msgid "Intel {i} stolen from {h}!"
+msgstr "Intel {i} rubato da {h}!"
+
+msgid "JUSTICE"
+msgstr "GIUSTIZIA"
+
+msgid "Key: {}b  Money: ${}  Files: {}"
+msgstr "Chiave: {}b  Soldi: ${}  Files: {}"
+
+msgid "LOCAL ({}/{} blocks)"
+msgstr "LOCALE ({}/{} blocks)"
+
+msgid "Language changes apply immediately."
+msgstr "Le modifiche alla lingua si applicano immediatamente."
+
+msgid "Language set to English."
+msgstr "Lingua impostata su Italiano."
+
+msgid "Language set to {}. Restart dialog to see changes."
+msgstr "Lingua impostata su {}. Riavvia la finestra per vedere le modifiche."
+
+msgid "Level"
+msgstr "Level"
+
+msgid "List files"
+msgstr "Lista file"
+
+msgid "Load"
+msgstr "📂 Carica"
+
+msgid "Login with password"
+msgstr "Accedi con password"
+
+msgid "Money"
+msgstr "Soldi"
+
+msgid "Money: ${}"
+msgstr "Soldi: ${}"
+
+msgid "NEXUS CORE MAINFRAME"
+msgstr "NEXUS CORE MAINFRAME"
+
+msgid "Name"
+msgstr "Nome"
+
+msgid "Network grid"
+msgstr "Reticolo rete"
+
+msgid "New Game"
+msgstr "🆕 Nuova Partita"
+
+msgid "New game"
+msgstr "Nuova partita"
+
+msgid "Next level"
+msgstr "Prossimo livello"
+
+msgid "Progress"
+msgstr "Progress"
+
+msgid "Read Darius emails"
+msgstr "Leggi email Darius"
+
+msgid "Remove alias"
+msgstr "Rimuovi alias"
+
+msgid "Restart? All progress will be lost."
+msgstr "Ricominciare? Tutti i progressi andranno persi."
+
+msgid "Run exploit"
+msgstr "Esegui exploit"
+
+msgid "SERVERS ({})"
+msgstr "SERVER ({})"
+
+msgid "STATE"
+msgstr "STATO"
+
+msgid "SYSTEM PANEL"
+msgstr "SYSTEM PANEL"
+
+msgid "Save"
+msgstr "💾 Salva"
+
+msgid "Scan ports"
+msgstr "Scansiona porte"
+
+msgid "Sell crypto"
+msgstr "Vende crypto"
+
+msgid "Sell intel on black market"
+msgstr "Vendi intel al mercato nero"
+
+msgid "Show file"
+msgstr "Mostra file"
+
+msgid "Show hardware"
+msgstr "Mostra hardware"
+
+msgid "Skill tree"
+msgstr "Skill tree"
+
+msgid "Sound: OFF"
+msgstr "Suono: OFF"
+
+msgid "Sound: ON"
+msgstr "Suono: ON"
+
+msgid "Stats"
+msgstr "Statistiche"
+
+msgid "Stolen intelligence list"
+msgstr "Lista intelligence rubate"
+
+msgid "Toggle sound"
+msgstr "Toggle suono"
+
+msgid "Trace route"
+msgstr "Traccia percorso"
+
+msgid "Transfer ${}..."
+msgstr "Trasferimento ${}..."
+
+msgid "Transfer money"
+msgstr "Trasferisci soldi"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Type HELP for commands. EMAIL to read Darius."
+msgstr "Digita HELP per i comandi. EMAIL per leggere Darius."
+
+msgid "Unlocked trophies"
+msgstr "Trofei sbloccati"
+
+msgid "Upgrade"
+msgstr "🔧 Aggiorna"
+
+msgid "Upgrade menu"
+msgstr "Menu upgrade"
+
+msgid "Upload"
+msgstr "Carica"
+
+msgid "Upload: {}"
+msgstr "Upload: {}"
+
+msgid "Use: LANG <en|it>"
+msgstr "Usa: LANG <en|it>"
+
+msgid "Virus factory"
+msgstr "Fabbrica virus"
+
+msgid "[+] Exploit {} executed on {}!"
+msgstr "[+] Exploit {} eseguito su {}!"
+
+msgid "[F1=Help]"
+msgstr "[F1=Help]"
+
+msgid "{} unlocked!"
+msgstr "{} sbloccata!"
