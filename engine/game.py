@@ -17,11 +17,17 @@ from ui.lang import _, _fmt
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def generate_servers(count=10):
-    """Genera una lista random di server dal pool globale."""
+    """Genera una lista random di server dal pool globale.
+    Costruisce un grafo di rete: ogni server ha collegamenti (links)
+    ad altri server visibili. I server di ingresso sono visibili da subito.
+    """
     pool = random.sample(SERVERS_POOL, min(count, len(SERVERS_POOL)))
+    # Mappa temporanea name → dict per risolvere i link
+    name_to_sv = {}
     servers = []
     for s in pool:
         is_gov = '.gov' in s[0] or '.mil' in s[0] or '.int' in s[0]
+        links_raw = s[6] if len(s) > 6 else []
         sv = {
             'name': s[0],
             'ports': list(s[1]),
@@ -37,6 +43,11 @@ def generate_servers(count=10):
             'pos': (0, 0),
             'is_gov': is_gov,
             'intel_stolen': False,
+            # Nuovi campi per il grafo di rete
+            'links': [],       # lista di riferimenti ad altri server (oggetti)
+            'links_raw': links_raw,  # nomi dei vicini dal pool (per salvataggio)
+            'visible': False,  # il giocatore lo vede sulla mappa?
+            'entry_point': False,  # server d'ingresso
         }
         if is_gov:
             sv['money'] = 0
@@ -46,6 +57,27 @@ def generate_servers(count=10):
             sv['intel_value'] = intel[2]
             sv['intel_size'] = intel[3]
         servers.append(sv)
+        name_to_sv[s[0].lower()] = sv
+
+    # Risolvi i collegamenti: solo tra server presenti in questa partita
+    for sv in servers:
+        sv['links'] = [
+            name_to_sv[n.lower()]
+            for n in sv['links_raw']
+            if n.lower() in name_to_sv
+        ]
+
+    # Determina i server d'ingresso (desk) e rendili visibili
+    desk_names = {'desk-11.corporate.com', 'desk-25.corporate.com'}
+    for sv in servers:
+        if sv['name'] in desk_names:
+            sv['visible'] = True
+            sv['entry_point'] = True
+    # Fallback: se nessun desk è nel pool, rendi visibile il primo server
+    if not any(s['visible'] for s in servers):
+        servers[0]['visible'] = True
+        servers[0]['entry_point'] = True
+
     return servers
 
 
@@ -158,6 +190,40 @@ class Game:
 
     def can_download(self, f):
         return self.used_mem() + max(1, len(f['content']) // 100) <= self.memory()
+
+    # ── Network graph ──
+
+    @property
+    def entry_servers(self):
+        """Server d'ingresso: visibili e raggiungibili senza connessione."""
+        return [s for s in self.servers if s.get('entry_point')]
+
+    def reachable_servers(self):
+        """Elenco dei server raggiungibili al momento."""
+        if self.current_server:
+            # Connesso: i vicini del server corrente
+            return list(self.current_server.get('links', []))
+        else:
+            # Non connesso: solo i server d'ingresso
+            return list(self.entry_servers)
+
+    def is_reachable(self, sv):
+        """Un server è raggiungibile se è vicino al server corrente
+        oppure è un punto d'ingresso (quando non connessi)."""
+        if sv is None:
+            return False
+        # Se siamo connessi e il target è un vicino → raggiungibile
+        if self.current_server and sv in self.current_server.get('links', []):
+            return True
+        # Se non connessi e il target è un punto d'ingresso → raggiungibile
+        if not self.current_server and sv.get('entry_point'):
+            return True
+        return False
+
+    def reveal_neighbors(self, sv):
+        """Rivela i vicini di un server (li rende visibili sulla mappa)."""
+        for neighbor in sv.get('links', []):
+            neighbor['visible'] = True
 
     # ── Trace system ──
 

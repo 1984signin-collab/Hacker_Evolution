@@ -12,6 +12,7 @@ from engine.config import Colors
 from engine.game import g
 from data import HARDWARE, STORY_MISSIONS, DARIUS_EMAILS
 from ui.rich_bridge import render_to_widget, make_table, make_panel
+from ui.lang import _, _fmt
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -63,6 +64,7 @@ def h_help(self, a, r):
         ('PING <host>', 'Connection test'),
         ('TRACEROUTE <host>', 'Trace route'),
         ('SCHEMATIC', 'Network grid'),
+        ('ROUTE', 'Network topology graph'),
         ('MISSIONS', 'Active missions'),
         ('NEWMISSION', 'Generate missions'),
         ('ACHIEVEMENTS', 'Unlocked trophies'),
@@ -99,13 +101,25 @@ def h_servers(self, a, r):
     for s in g.servers:
         st = '[green]HACKED[/]' if g.hacked(s) else '[yellow]SCANNED[/]' if s['scanned'] else '[dim]UNKNOWN[/]'
         gov = '[red]GOV[/]' if s.get('is_gov') else ''
-        rows.append([st, gov, f'[cyan]{s["name"]}[/]', f'[dim]{s["desc"]}[/]'])
+        vis = '[cyan]*[/]' if s.get('visible') else '[dim] [/]'
+        name = f'[cyan]{s["name"]}[/]' if s.get('visible') else f'[dim]{s["name"]}[/]'
+        rows.append([vis, st, gov, name, f'[dim]{s["desc"]}[/]'])
     table = make_table(
-        title=_('[bold yellow]SERVER ({len(g.servers)})[/]'),
-        headers=['Status', 'Type', 'Name', 'Description'],
+        title=_('[bold yellow]SERVERS ({len(g.servers)})[/]'),
+        headers=[_('Net'), _('Status'), _('Type'), _('Name'), _('Description')],
         rows=rows,
     )
     self.console_rich(table)
+    reachable = g.reachable_servers()
+    if reachable:
+        self.console_rich(
+            _fmt('[dim]Reachable: {}[/]', ', '.join(s['name'] for s in reachable))
+        )
+    entry = g.entry_servers
+    if entry:
+        self.console_rich(
+            _fmt('[dim]Entry points: {}[/]', ', '.join(s['name'] for s in entry))
+        )
 
 
 def h_money(self, a, r):
@@ -176,10 +190,21 @@ def h_scan(self, a, r):
     s = g.server(host)
     if s:
         s['scanned'] = True
+        # Rivela i vicini nel grafo di rete
+        g.reveal_neighbors(s)
         self.console_out_type(_fmt('\n[+] Server FOUND: {}', s["name"]), 'green', 12)
         self.console_out_type(_fmt('    Ports: {}', ", ".join(str(p) for p in s["ports"])), 'cyan', 12)
         self.console_out_type(_fmt('    Key: {} bits', s["key_bits"]), 'yellow', 12)
         self.console_out_type(_fmt('    Status: {}', 'ENCRYPTED' if not s['decrypted'] else 'DECRYPTED'), 'orange', 12)
+        # Mostra i vicini
+        neighbors = [n['name'] for n in s.get('links', [])]
+        if neighbors:
+            visible_n = [n for n in s.get('links', []) if n.get('visible')]
+            self.console_out_type(
+                _fmt('    🌐 Neighbors ({}): {}', len(visible_n), ', '.join(n['name'] for n in visible_n)),
+                'cyan', 12,
+            )
+        # Trace rimane invariato
         if g.add_trace(1):
             self.console_out(_('TRACED!'), 'red')
         self.update_map()
@@ -213,6 +238,63 @@ def h_scanports(self, a, r):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# h_route — Network graph topology
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def h_route(self, a, r):
+    """Show the network graph: visible servers and their connections."""
+    self.console_out('═' * 60, 'cyan')
+    self.console_out(_('🌐 NETWORK TOPOLOGY'), 'yellow')
+    self.console_out('═' * 60, 'cyan')
+    visible = [s for s in g.servers if s.get('visible')]
+    if not visible:
+        self.console_out(_('No network map available yet. Scan an entry server first.'), 'dim')
+        return
+    for sv in visible:
+        # Stato del server
+        if g.hacked(sv):
+            icon = '✓'
+            color = 'green'
+        elif sv.get('cracked'):
+            icon = '◉'
+            color = 'yellow'
+        elif sv.get('scanned'):
+            icon = '◌'
+            color = 'orange'
+        else:
+            icon = '○'
+            color = 'dim'
+        entry = ' [ENTRY]' if sv.get('entry_point') else ''
+        conn = ' [CONNECTED]' if sv is g.current_server else ''
+        self.console_out(
+            _fmt('  [{color}]{icon} {name}{entry}{conn}[/]'),
+            color, 12,
+        )
+        # Vicini visibili
+        vis_neighbors = [n for n in sv.get('links', []) if n.get('visible')]
+        if vis_neighbors:
+            self.console_out(
+                _fmt('      → {}', ', '.join(n['name'] for n in vis_neighbors)),
+                'cyan', 12,
+            )
+    self.console_out('═' * 60, 'cyan')
+    self.console_out(_fmt('Visible: {}  |  Total: {}', len(visible), len(g.servers)), 'dim')
+    if g.current_server:
+        reachable = [n['name'] for n in g.reachable_servers()]
+        self.console_out(
+            _fmt('From [{}]: reachable → {}', g.current_server['name'],
+                 ', '.join(reachable) if reachable else _('none')),
+            'green', 12,
+        )
+    else:
+        entry_names = ', '.join(e['name'] for e in g.entry_servers)
+        self.console_out(
+            _fmt('Entry points (connect first): {}', entry_names),
+            'green', 12,
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # h_connect / h_logout
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -235,10 +317,34 @@ def h_connect(self, a, r):
     if not s['cracked'].get(port):
         self.console_out(_fmt('Crack {}:{} first', host, port), 'red')
         return
+    # Verifica raggiungibilità nel grafo
+    if not g.is_reachable(s):
+        if g.current_server:
+            reachable = [n['name'] for n in g.reachable_servers()]
+            self.console_out(
+                _fmt('{} is not reachable from {}. Neighbors: {}',
+                     host,
+                     g.current_server['name'],
+                     ', '.join(reachable) if reachable else _('none (try SCAN first)')),
+                'red',
+            )
+        else:
+            entry_names = ', '.join(e['name'] for e in g.entry_servers)
+            self.console_out(
+                _fmt('{} is not reachable. Entry points: {}', host, entry_names),
+                'red',
+            )
+        self._sound_error()
+        return
     g.current_server = s
     g.current_port = port
     s['visited'] = True
+    # Rivela i vicini quando ti connetti
+    g.reveal_neighbors(s)
     self.console_out_type(_fmt('[+] Connected to {}:{}', host, port), 'green', 12)
+    neighbors = [n['name'] for n in s.get('links', [])]
+    if neighbors:
+        self.console_out_type(_fmt('    🌐 Links: {}', ', '.join(neighbors)), 'cyan', 12)
     self._sound_connect()
     if g.add_trace(1):
         self.console_out(_('TRACED!'), 'red')
@@ -1060,6 +1166,7 @@ HackerApp.h_sound = h_sound
 HackerApp.h_ping = h_ping
 HackerApp.h_traceroute = h_traceroute
 HackerApp.h_schematic = h_schematic
+HackerApp.h_route = h_route
 HackerApp.h_crypto = h_crypto
 HackerApp.h_buycrypto = h_buycrypto
 HackerApp.h_sellcrypto = h_sellcrypto
