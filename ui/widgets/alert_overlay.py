@@ -19,14 +19,16 @@ class AlertOverlay:
         success — green border, green text
     """
 
-    def __init__(self, canvas: tk.Canvas):
+    def __init__(self, canvas: tk.Canvas, parent: tk.Widget):
         self.canvas = canvas
+        self._parent = parent
         self._active = False
         self._frame = 0
         self._type = 'info'
         self._message = ''
         self._duration = 0
         self._callback = None
+        self._placed = False
 
     @property
     def _colors(self):
@@ -46,6 +48,9 @@ class AlertOverlay:
         self._callback = callback
         self._active = True
         self._frame = 0
+        if not self._placed:
+            self.canvas.place(relx=0, rely=0, relwidth=1, relheight=1)
+            self._placed = True
 
     def animate(self):
         if not self._active:
@@ -72,6 +77,9 @@ class AlertOverlay:
             alpha = max(0, 0.5 * (1 - (t - self._duration) / 500))
         if alpha <= 0:
             self._active = False
+            self.canvas.delete('alert')
+            self.canvas.place_forget()
+            self._placed = False
             if self._callback:
                 self._callback()
             return

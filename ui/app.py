@@ -77,11 +77,9 @@ class HackerApp:
 
         self.setup_title()
         self.setup_layout()
-        # Alert overlay canvas on top of everything
+        # Alert overlay — canvas placed/unplaced dynamically by AlertOverlay
         self._alert_canvas = tk.Canvas(self.main_frame, bg=Theme.BG_VOID, highlightthickness=0)
-        self._alert_canvas.place(relx=0, rely=0, relwidth=1, relheight=1)
-        self._alert_overlay = AlertOverlay(self._alert_canvas)
-        # Initially hidden — AlertOverlay.show() will raise it when needed
+        self._alert_overlay = AlertOverlay(self._alert_canvas, self.main_frame)
         self.setup_menu()
         self.setup_bindings()
         self.animate_particles()
@@ -411,7 +409,10 @@ class HackerApp:
 
     def _boot_transition_main(self):
         self._boot_state = 'DONE'
-        # Clean console and show transition
+        self.root.deiconify()
+        self.root.lift()
+        self.root.focus_force()
+        self.root.update_idletasks()
         self.console.config(state=tk.NORMAL)
         self.console.delete('1.0', tk.END)
         self.console.config(state=tk.DISABLED)
