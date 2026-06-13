@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Hacker Evolution Mission Schema",
+  "description": "Schema for story mission JSON files in data/missions/",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Unique mission identifier"
+      },
+      "name": {
+        "type": "string",
+        "description": "Display name of the mission"
+      },
+      "lvl": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Minimum player level required"
+      },
+      "desc": {
+        "type": "string",
+        "description": "Mission description/flavour text"
+      },
+      "obj_type": {
+        "type": "string",
+        "description": "Objective type key",
+        "enum": [
+          "download",
+          "login",
+          "bounce",
+          "combine",
+          "gsm_transfer",
+          "levin_heist",
+          "mckinnon_intel",
+          "download_multi",
+          "lamp_upload",
+          "anon_rising"
+        ]
+      },
+      "obj_file": {
+        "type": "string",
+        "description": "Target file for download missions"
+      },
+      "obj_count": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Count for multi-objective missions"
+      },
+      "reward": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Money reward on completion"
+      },
+      "dialogue": {
+        "type": "array",
+        "description": "Story dialogue sequence",
+        "items": {
+          "type": "object",
+          "properties": {
+            "who": { "type": "string" },
+            "text": { "type": "string" }
+          },
+          "required": ["who", "text"]
+        }
+      }
+    },
+    "required": ["id", "name", "lvl", "desc", "obj_type"]
+  }
+}

@@ -143,6 +143,43 @@ DORMANT ──(trace > 30%)──→ ANALYZING ──(trace > 60%)──→ ACTI
 
 ---
 
+## 🧠 Architecture — Refactoring Roadmap (5 Phases)
+
+The engine was refactored in 5 phases per `update/Fase-Obiettivo-Azioniconcrete-Deliverable.csv`:
+
+### Phase 1 — Hardening (Data Layer)
+- **`engine/models.py`** — Typed dataclasses for all content: `Server`, `Mission`, `Email`, `Exploit`, `HardwareItem`, `GovernmentIntel`. Each model has `from_dict()` for JSON deserialization and `to_dict()` for serialization.
+- **`engine/validation.py`** — `ContentValidator` centralizzato. Validates servers, hardware, exploits, missions, emails, gov intel at startup. Errors/warnings collected and reported without crashing.
+- **`data/__init__.py`** — All `_load_json` calls now pass through the validator.
+- **`data/schema/`** — JSON Schema (Draft-07) files for each content type (`mission_schema.json`, `email_schema.json`, `exploit_schema.json`, `server_schema.json`).
+- **`tests/test_data.py`** — 35 unit tests covering models and validation edge cases.
+
+### Phase 2 — Command System
+- **`engine/command_registry.py`** — `CommandRegistry` singleton with `CommandMeta` (name, handler, help_text, usage, aliases, min_level, admin_only, category). Decorator-style registration and auto-generated HELP.
+- Static `h_help` replaced with **dynamic HELP** generated from the registry — filtered by category, player level, and admin status.
+- Commands are now registered with metadata (`_register()` calls at the bottom of `ui/commands.py`).
+
+### Phase 3 — Domain Services
+- **`engine/services/__init__.py`** — `EventBus` singleton pub/sub system with `DomainEvent` types. Decouples engine logic from UI.
+- **`engine/services/economy_service.py`** — `EconomyService`: money management, purchase validation, crypto market simulation.
+- **`engine/services/network_service.py`** — `NetworkService`: scan, connect, neighbor resolution, BFS reachability.
+- **`engine/services/trace_service.py`** — `TraceService`: trace level management with state tracking (safe/warning/danger/critical).
+- **`engine/services/mission_service.py`** — `MissionService`: mission progress checking, completion, reward dispatching.
+- **`engine/services/sentinel_service.py`** — `SentinelService`: wraps the SentinelFSM for game integration with event dispatching.
+- `Game.services` container provides access to all services at `g.services.economy`, `g.services.network`, etc.
+
+### Phase 4 — FSM & Event Systems
+- **`engine/sentinel.py`** — Dedicated `SentinelFSM` class with states `DORMANT → ANALYZING → ACTIVE`. Observable via domain events (`sentinel.state_changed`, `sentinel.port_closed`, `sentinel.file_deleted`, `sentinel.trace_amplified`).
+- Counter-strikes: close ports, delete files, amplify trace. De-escalation when trace drops.
+- `SentinelService` wraps the FSM and integrates with the game's event bus.
+
+### Phase 5 — UX & Modding
+- **JSON Schema** files in `data/schema/` — validate modded content against a formal schema (Draft-07).
+- **`DEBUGSTATE`** command — shows internal state of all FSM, services, event bus, command registry, and game state at a glance.
+- **`VALIDATECONTENT`** command — re-runs the ContentValidator on all JSON files at runtime. Instant feedback for modders.
+
+---
+
 ## 📡 Random System Events
 
 While you work, the terminal feels alive. Every 20–60 seconds, random system messages appear:
@@ -202,16 +239,33 @@ This will overwrite `assets/demo.gif`.
 hacker-evolution/
 ├── main.py                     # Entry point
 ├── engine/                     # Game engine (logic, not content)
+│   ├── __init__.py             # Module exports (CommandRegistry, EventBus, etc.)
 │   ├── game.py                 # Game state, network, save/load
-│   └── config.py               # Configuration and colors
+│   ├── config.py               # Configuration and colors
+│   ├── models.py               # Phase 1: Typed dataclasses (Server, Mission, etc.)
+│   ├── validation.py           # Phase 1: ContentValidator
+│   ├── sentinel.py             # Phase 4: SentinelFSM (DORMANT→ANALYZING→ACTIVE)
+│   ├── command_registry.py     # Phase 2: CommandRegistry singleton
+│   └── services/               # Phase 3: Service layer (EventBus + Domain Services)
+│       ├── __init__.py         # EventBus, DomainEvent, DomainEventType
+│       ├── economy_service.py  # Money, crypto, purchase validation
+│       ├── network_service.py  # Scan, connect, reachability
+│       ├── trace_service.py    # Trace level management
+│       ├── mission_service.py  # Mission lifecycle
+│       └── sentinel_service.py # SentinelFSM wrapper
 ├── ui/                         # User interface (tkinter + Rich)
 │   ├── app.py                  # Main window and event loop
-│   ├── commands.py             # Command implementations
+│   ├── commands.py             # Command implementations + CommandRegistry wiring
 │   ├── hud.py                  # Animated heads-up display
 │   ├── panels.py               # Side panels and map
 │   └── rich_bridge.py          # Rich → tkinter Text widget bridge
 ├── data/                       # 📁 CONTENT — edit these to mod the game
-│   ├── __init__.py             # Auto-loader (reads all .json files)
+│   ├── __init__.py             # Auto-loader + ContentValidator integration
+│   ├── schema/                 # Phase 5: JSON Schema files
+│   │   ├── mission_schema.json
+│   │   ├── email_schema.json
+│   │   ├── exploit_schema.json
+│   │   └── server_schema.json
 │   ├── missions/               # 📜 Story missions (one file per mission)
 │   │   ├── 01_captain_crunch.json
 │   │   ├── 02_the_414s.json
@@ -224,6 +278,9 @@ hacker-evolution/
 │   ├── exploits.json           # 🕶️ Darknet exploit definitions
 │   ├── gov_intel.json          # 🏛️ Government intel types
 │   └── hardware.json           # 🔧 Hardware shop items
+├── tests/                      # Phase 1: Unit tests
+│   ├── __init__.py
+│   └── test_data.py            # 35 tests for models + validation
 ├── docs/                       # 📖 Documentation
 │   └── MODDING.md              # Modding API reference
 ├── scripts/

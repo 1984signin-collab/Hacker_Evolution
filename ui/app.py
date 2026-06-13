@@ -893,6 +893,8 @@ class HackerApp:
             'intel': self.h_intel, 'sellintel': self.h_sellintel,
             'story': self.h_story,
             'darknet': self.h_darknet,
+            'debugstate': self.h_debugstate,
+            'validatecontent': self.h_validatecontent,
         }
         if cmd not in h_map and cmd in g.aliases:
             self.exec_cmd(g.aliases[cmd])
@@ -1521,3 +1523,29 @@ from ui.panels import *    # noqa: F401, F403 — patches dialog methods onto Ha
 from ui.hud import HUDBackground  # noqa: F401 — re-export for importers
 
 from ui.lang import _, _fmt
+
+# ── Register remaining commands defined in panels.py / app.py ──
+from engine.command_registry import CommandMeta as _CM
+
+_reg = HackerApp._commands_registry if hasattr(HackerApp, '_commands_registry') else None
+if _reg is None:
+    # Fallback: get the singleton from CommandRegistry
+    from engine.command_registry import CommandRegistry as _CR
+    _reg = _CR()
+
+_reg.register(_CM(name='missions', handler=HackerApp.h_missions,
+                  help_text='Show active missions', category='missions'))
+_reg.register(_CM(name='newmission', handler=HackerApp.h_newmission,
+                  help_text='Generate new missions', category='missions'))
+_reg.register(_CM(name='achievements', handler=HackerApp.h_achievements,
+                  help_text='Show unlocked achievements', category='missions'))
+_reg.register(_CM(name='market', handler=HackerApp.h_market,
+                  help_text='Black market shop', category='exploits'))
+_reg.register(_CM(name='skills', handler=HackerApp.h_skills,
+                  help_text='Skill tree', category='system'))
+_reg.register(_CM(name='view', handler=HackerApp.h_view,
+                  help_text='3D server view', category='system'))
+_reg.register(_CM(name='switch', handler=HackerApp.h_switch,
+                  help_text='Trigger endgame switch', category='story'))
+_reg.register(_CM(name='glitch', handler=lambda s, a, r: None,
+                  help_text='Glitch visual effect', category='system'))

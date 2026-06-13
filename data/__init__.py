@@ -4,12 +4,20 @@
 # Le missioni e le email sono caricate da file individuali in
 # data/missions/ e data/emails/ — basta creare un nuovo file .json
 # per aggiungere contenuto. Il gioco lo rileva automaticamente.
+#
+# Phase 1 (Hardening): tutti i contenuti sono validati all'avvio
+# tramite ContentValidator. Errori e warning sono stampati su stderr
+# ma non bloccano il caricamento — la community può moddare senza
+# timore di crashare il gioco.
 
 import json
 import os
 import sys
 
+from engine.validation import ContentValidator
+
 _data_dir = os.path.dirname(__file__)
+_validator = ContentValidator()
 
 
 def _load_json(filename):
@@ -57,22 +65,25 @@ def _load_json_dir(subdir):
 
 # ── Server pool ──
 # Lista di [name, ports, key_bits, [[filename, content], ...], money, desc]
-SERVERS_POOL = _load_json('servers.json')
+SERVERS_POOL = _validator.validate_server_pool(_load_json('servers.json'))
 
 # ── Government intel types ──
 # {"types": [[id, desc, value, size], ...], "domains": [...]}
-_gov = _load_json('gov_intel.json')
+_gov = _validator.validate_gov_intel(_load_json('gov_intel.json'))
 GOV_INTEL_TYPES = _gov['types']
 GOV_DOMAINS = _gov['domains']
 
 # ── Story missions ── (caricate da file individuali in data/missions/)
-STORY_MISSIONS = _load_json_dir('missions')
+STORY_MISSIONS = _validator.validate_story_missions(_load_json_dir('missions'))
 
 # ── Darius emails ── (caricate da file individuali in data/emails/)
-DARIUS_EMAILS = _load_json_dir('emails')
+DARIUS_EMAILS = _validator.validate_emails(_load_json_dir('emails'))
 
 # ── Hardware shop ──
-HARDWARE = _load_json('hardware.json')
+HARDWARE = _validator.validate_hardware(_load_json('hardware.json'))
 
 # ── Darknet exploits ──
-EXPLOITS = _load_json('exploits.json')
+EXPLOITS = _validator.validate_exploits(_load_json('exploits.json'))
+
+# ── Report validation results ──
+_validator.report()

@@ -8,6 +8,14 @@ import random
 import time
 
 from engine.config import SAVE_FILE, AUTO_FILE
+from engine.command_registry import CommandRegistry
+from engine.services import EventBus, DomainEvent, DomainEventType
+from engine.services.network_service import NetworkService
+from engine.services.economy_service import EconomyService
+from engine.services.trace_service import TraceService
+from engine.services.mission_service import MissionService
+from engine.services.sentinel_service import SentinelService
+from engine.sentinel import SentinelFSM
 from data import SERVERS_POOL, GOV_INTEL_TYPES, GOV_DOMAINS, STORY_MISSIONS, DARIUS_EMAILS, HARDWARE, EXPLOITS
 
 
@@ -164,6 +172,46 @@ class Game:
         # ── Random events ──
         self.event_timer = 0
         self.event_paused = False
+
+        # ── Phase 3+4: Services & Event Bus ──
+        self._bus = EventBus()
+        self._init_services()
+
+    def _init_services(self):
+        """Initialize the service layer (Phase 3: Domain)."""
+        self.services = Services(self)
+
+    def _make_sentinel_fsm(self):
+        """Create the SentinelFSM instance wired to this game."""
+        return SentinelFSM(
+            get_trace=lambda: self.trace_level,
+            get_current_server=lambda: self.current_server,
+            get_local_files=lambda: self.local_files,
+            add_log=self.add_log,
+            add_news=self.add_news,
+            notify=self.notify,
+            has_exploit=self.has_exploit,
+        )
+
+    @property
+    def network(self) -> 'NetworkService':
+        return self.services.network
+
+    @property
+    def economy(self) -> 'EconomyService':
+        return self.services.economy
+
+    @property
+    def trace_svc(self) -> 'TraceService':
+        return self.services.trace
+
+    @property
+    def mission_svc(self) -> 'MissionService':
+        return self.services.missions
+
+    @property
+    def sentinel_svc(self) -> 'SentinelService':
+        return self.services.sentinel
 
     # ── Hardware helpers ──
 
@@ -754,6 +802,47 @@ class Game:
             return True
         except Exception:
             return False
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Services container
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Services:
+    """Container for all Phase 3 services. Wraps Game state without duplicating it."""
+
+    def __init__(self, game: Game):
+        self.game = game
+        self.economy = EconomyService(
+            get_money=lambda: game.money,
+            set_money=lambda v: setattr(game, 'money', v),
+            get_money_max=lambda: game.money if hasattr(game, 'money') else 10_000_000,
+        )
+        self.network = NetworkService(
+            get_server=game.server,
+            get_all_servers=lambda: game.servers,
+        )
+        self.trace = TraceService(
+            get_trace=lambda: game.trace_level,
+            set_trace=lambda v: setattr(game, 'trace_level', v),
+        )
+        self.missions = MissionService(
+            get_missions=lambda: game.missions,
+            set_missions=lambda ms: setattr(game, 'missions', ms),
+            add_log=game.add_log,
+            add_news=game.add_news,
+        )
+        # SentinelFSM — wraps game's existing sentinel logic
+        sentinel_fsm = SentinelFSM(
+            get_trace=lambda: game.trace_level,
+            get_current_server=lambda: game.current_server,
+            get_local_files=lambda: game.local_files,
+            add_log=game.add_log,
+            add_news=game.add_news,
+            notify=game.notify,
+            has_exploit=game.has_exploit,
+        )
+        self.sentinel = SentinelService(sentinel_fsm)
 
 
 # ── Global game instance ──

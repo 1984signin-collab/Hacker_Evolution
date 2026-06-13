@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-# HACKER EVOLUTION — Command handlers
+# HACKER EVOLUTION — Command handlers (Phase 2: Command System)
 # These are patched onto HackerApp at import time.
+# Commands are registered in the CommandRegistry for auto-generated HELP.
 
 import random
 import threading
@@ -9,10 +10,24 @@ import tkinter as tk
 from tkinter import messagebox
 
 from engine.config import Colors
+from engine.command_registry import CommandRegistry, CommandMeta
 from engine.game import g
 from data import HARDWARE, STORY_MISSIONS, DARIUS_EMAILS, EXPLOITS
 from ui.rich_bridge import render_to_widget, make_table, make_panel
 from ui.lang import _, _fmt
+
+# ── Command Registry ──
+_registry = CommandRegistry()
+
+
+def _register(name, handler, help_text, usage='', aliases=None,
+              min_level=0, admin_only=False, category='general'):
+    """Shortcut to register a command in the registry."""
+    _registry.register(CommandMeta(
+        name=name, handler=handler, help_text=help_text,
+        usage=usage, aliases=aliases or [],
+        min_level=min_level, admin_only=admin_only, category=category,
+    ))
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -31,66 +46,180 @@ def _connected(self):
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def h_help(self, a, r):
+    """Auto-generated HELP from the CommandRegistry (Phase 2)."""
     from rich.table import Table
+    cmds = _registry.list_commands(
+        player_level=g.level,
+        include_admin=True,
+    )
+    if not cmds:
+        self.console_out(_('No commands registered.'), 'red')
+        return
+
+    # Group by category
+    cats = {}
+    for cmd in cmds:
+        cats.setdefault(cmd.category, []).append(cmd)
+
     table = Table(show_header=False, box=None, padding=(0, 1))
     table.add_column('Cmd')
     table.add_column('Desc')
-    for c, d in [
-        ('HELP/?', 'Help'),
-        ('SCAN <host>', 'Find server'),
-        ('CONNECT <host> [port]', 'Connect'),
-        ('LOGOUT', 'Disconnect'),
-        ('CRACK <host> [port]', 'Brute force password'),
-        ('DECRYPT <host>', 'Decrypt key'),
-        ('LOGIN <host> <pwd>', 'Login with password'),
-        ('LS/DIR', 'List files'),
-        ('CAT <file>', 'Show file'),
-        ('DOWNLOAD <file>', 'Download'),
-        ('UPLOAD <file>', 'Upload'),
-        ('DELETE <file>', 'Delete'),
-        ('TRANSFER <n>', 'Transfer money'),
-        ('EXEC <e> <h>', 'Run exploit'),
-        ('BOUNCE <host>', 'Add/remove bounce'),
-        ('BOUNCEINFO', 'Bounce chain'),
-        ('BOUNCEHELP', 'Bounce help'),
-        ('KILLTRACE', '-10% trace ($500)'),
-        ('DELETELOGS', 'Delete server logs'),
-        ('CONFIG', 'Show hardware'),
-        ('UPGRADE', 'Upgrade menu'),
-        ('NEXTLEVEL', 'Next level'),
-        ('MONEY', 'Money'),
-        ('SERVERS', 'All servers'),
-        ('SCANPORTS <host>', 'Scan ports'),
-        ('PING <host>', 'Connection test'),
-        ('TRACEROUTE <host>', 'Trace route'),
-        ('SCHEMATIC', 'Network grid'),
-        ('ROUTE', 'Network topology graph'),
-        ('MISSIONS', 'Active missions'),
-        ('NEWMISSION', 'Generate missions'),
-        ('ACHIEVEMENTS', 'Unlocked trophies'),
-        ('CRYPTO', 'Crypto market'),
-        ('BUYCRYPTO <c> <n>', 'Buy crypto'),
-        ('SELLCRYPTO <c> <n>', 'Sell crypto'),
-        ('INTEL', 'Stolen intelligence list'),
-        ('SELLINTEL <id>', 'Sell intel on black market'),
-        ('DARKNET', 'Darknet exploit shop'),
-        ('MARKET', 'Black market'),
-        ('STORY', 'Hacker legend missions'),
-        ('EMAIL', 'Read Darius emails'),
-        ('SWITCH', 'Final switch (endgame only)'),
-        ('COMBINE <f1> <f2>', 'Virus factory'),
-        ('SKILLS', 'Skill tree'),
-        ('ALIAS <n> <c>', 'Create alias'),
-        ('UNALIAS <n>', 'Remove alias'),
-        ('VIEW', '3D server view'),
-        ('STATS', 'Stats'),
-        ('GLITCH', 'Glitch effect'),
-        ('SOUND', 'Toggle sound'),
-        ('NEWGAME', 'New game'),
-    ]:
-        table.add_row(f'[bold cyan]{c}[/]', f'[dim]{d}[/]')
+    for cat in sorted(cats):
+        table.add_row(f'[{cat.upper()}]', '', style='bold yellow')
+        for cmd in cats[cat]:
+            label = cmd.name.upper()
+            if cmd.aliases:
+                label += '/' + '/'.join(a.upper() for a in cmd.aliases)
+            if cmd.usage:
+                label += f' {cmd.usage}'
+            desc = cmd.help_text[:65] if cmd.help_text else ''
+            table.add_row(f'[bold cyan]{label}[/]', f'[dim]{desc}[/]')
+
     panel = make_panel(table, title=_('[bold yellow]AVAILABLE COMMANDS[/]'))
     self.console_rich(panel)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 5: h_debugstate / h_validatecontent
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def h_debugstate(self, a, r):
+    """DEBUGSTATE — mostra lo stato interno di tutte le FSM e servizi.
+    
+    Utile per modder, debugging e test. Mostra stato di:
+      - Sentinel FSM
+      - Event Bus subscribers
+      - Command Registry
+      - Servizi (Economy, Network, Trace, Mission)
+    """
+    from rich.table import Table
+    from rich.panel import Panel
+
+    # Sentinel FSM
+    sentinel = g.sentinel_svc
+    s_table = Table(show_header=False, box=None, padding=(0, 1))
+    s_table.add_column('Key')
+    s_table.add_column('Value')
+    s_table.add_row('State', f'[bold]{sentinel.state.value}[/]')
+    s_table.add_row('Timer', str(sentinel._fsm.timer))
+    s_table.add_row('Cooldown', str(sentinel.cooldown))
+    s_table.add_row('Strikes', str(sentinel.strikes))
+    s_table.add_row('Ports Closed', str(sentinel._fsm.ports_closed))
+    s_panel = make_panel(s_table, title=_('[bold magenta]SENTINEL FSM[/]'))
+    self.console_rich(s_panel)
+
+    # Event Bus (subscriber count)
+    bus = g._bus
+    bus_table = Table(show_header=False, box=None, padding=(0, 1))
+    bus_table.add_column('Key')
+    bus_table.add_column('Value')
+    for key, handlers in bus._subscribers.items():
+        bus_table.add_row(key, f'{len(handlers)} handlers')
+    bus_panel = make_panel(bus_table, title=_('[bold cyan]EVENT BUS[/]'))
+    self.console_rich(bus_panel)
+
+    # Command Registry
+    reg_table = Table(show_header=False, box=None, padding=(0, 1))
+    reg_table.add_column('Key')
+    reg_table.add_column('Value')
+    d = _registry.to_dict()
+    reg_table.add_row('Commands', str(len(d.get('commands', []))))
+    reg_table.add_row('Aliases', str(len(d.get('aliases', {}))))
+    cats = ', '.join(c for c in _registry.categories())
+    reg_table.add_row('Categories', cats)
+    reg_panel = make_panel(reg_table, title=_('[bold yellow]COMMAND REGISTRY[/]'))
+    self.console_rich(reg_panel)
+
+    # Services
+    svc_table = Table(show_header=False, box=None, padding=(0, 1))
+    svc_table.add_column('Service')
+    svc_table.add_column('Status')
+    svc_table.add_row('Economy', f'${g.money:,.0f}')
+    svc_table.add_row('Trace', f'{g.trace_level:.1f}%')
+    svc_table.add_row('Network', f'{len(g.servers)} servers')
+    svc_table.add_row('Missions', f'{len(g.missions)} active')
+    svc_panel = make_panel(svc_table, title=_('[bold green]SERVICES[/]'))
+    self.console_rich(svc_panel)
+
+    # Game state summary
+    game_table = Table(show_header=False, box=None, padding=(0, 1))
+    game_table.add_column('Key')
+    game_table.add_column('Value')
+    game_table.add_row('Version', 'v1.0 Phase 5 (Hardened)')
+    game_table.add_row('Level', str(g.level))
+    game_table.add_row('Score', str(g.score))
+    game_table.add_row('Money', f'${g.money:,.0f}')
+    game_table.add_row('Server', g.current_server['name'] if g.current_server else 'None')
+    game_table.add_row('Hack Count', str(g.hack_count))
+    game_table.add_row('Exploits', ', '.join(g.exploits) if g.exploits else 'None')
+    game_table.add_row('Trace', f'{g.trace_level:.1f}%')
+    game_table.add_row('Sentinel', sentinel.state.value)
+    game_panel = make_panel(game_table, title=_('[bold white]GAME STATE[/]'))
+    self.console_rich(game_panel)
+
+
+def h_validatecontent(self, a, r):
+    """VALIDATECONTENT — esegue il ContentValidator su tutti i contenuti.
+    
+    Ricarica e valida tutti i JSON di data/ a runtime.
+    Utile per modder che vogliono verificare i loro file modificati.
+    """
+    from engine.validation import ContentValidator
+    from data import _load_json, _load_json_dir, _data_dir
+
+    v = ContentValidator(silent=True)
+
+    # Server pool
+    import os
+    pool_path = os.path.join(_data_dir, 'servers.json')
+    try:
+        pool = _load_json('servers.json')
+        v.validate_server_pool(pool)
+    except Exception as e:
+        v.error(f'servers.json: {e}')
+
+    # Hardware
+    try:
+        hw = _load_json('hardware.json')
+        v.validate_hardware(hw)
+    except Exception as e:
+        v.error(f'hardware.json: {e}')
+
+    # Exploits
+    try:
+        ex = _load_json('exploits.json')
+        v.validate_exploits(ex)
+    except Exception as e:
+        v.error(f'exploits.json: {e}')
+
+    # Gov intel
+    try:
+        gov = _load_json('gov_intel.json')
+        v.validate_gov_intel(gov)
+    except Exception as e:
+        v.error(f'gov_intel.json: {e}')
+
+    # Missions
+    try:
+        missions = _load_json_dir('missions')
+        v.validate_story_missions(missions)
+    except Exception as e:
+        v.error(f'missions/: {e}')
+
+    # Emails
+    try:
+        emails = _load_json_dir('emails')
+        v.validate_emails(emails)
+    except Exception as e:
+        v.error(f'emails/: {e}')
+
+    # Report
+    has_errors = v.report()
+    if has_errors:
+        count = len(v.errors)
+        self.notify(f'⚠ VALIDATION: {count} errors', 'red')
+    else:
+        self.notify('✅ VALIDATION: All content valid!', 'green')
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1290,3 +1419,65 @@ HackerApp.h_stats = h_stats
 HackerApp.h_email = h_email
 HackerApp.h_darknet = h_darknet
 HackerApp._buy_darknet = _buy_darknet
+# Patch new Phase 5 commands
+HackerApp.h_debugstate = h_debugstate
+HackerApp.h_validatecontent = h_validatecontent
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 2: Command Registration — register all commands in the CommandRegistry
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _register_commands():
+    """Register all commands defined in this file (and callable from app.py)."""
+    _register('help', h_help, 'Show this help', aliases=['?'], category='general')
+    _register('scan', h_scan, 'Scan a target server', 'host', category='network')
+    _register('connect', h_connect, 'Connect to a server', 'host [port]', aliases=['ssh'], category='network')
+    _register('logout', h_logout, 'Disconnect from current server', aliases=['disconnect'], category='network')
+    _register('crack', h_crack, 'Brute force crack a port', 'host [port]', category='network')
+    _register('decrypt', h_decrypt, 'Decrypt server key', 'host', category='network')
+    _register('login', h_login, 'Login with known password', 'host pwd', category='network')
+    _register('ls', h_ls, 'List local or current server files', aliases=['dir'], category='files')
+    _register('cat', h_cat, 'Show file contents', 'file', category='files')
+    _register('download', h_download, 'Download file from current server', 'file', category='files')
+    _register('upload', h_upload, 'Upload local file to current server', 'file', category='files')
+    _register('delete', h_delete, 'Delete a file', 'file', category='files')
+    _register('transfer', h_transfer, 'Transfer money from current server', 'amount', category='money')
+    _register('money', h_money, 'Show current balance', category='money')
+    _register('crypto', h_crypto, 'Show crypto market', category='money')
+    _register('buycrypto', h_buycrypto, 'Buy cryptocurrency', 'type amount', category='money')
+    _register('sellcrypto', h_sellcrypto, 'Sell cryptocurrency', 'type amount', category='money')
+    _register('exec', h_exec, 'Run exploit on current server', 'exploit host', category='exploits')
+    _register('darknet', h_darknet, 'Darknet exploit shop', category='exploits')
+    _register('bounce', h_bounce, 'Toggle bounce on a server', 'host', category='network')
+    _register('bounceinfo', h_bounceinfo, 'Show bounce chain status', category='network')
+    _register('bouncehelp', h_bouncehelp, 'Bounce explanation', category='network')
+    _register('killtrace', h_killtrace, 'Pay $500 to reduce trace', category='trace')
+    _register('deletelogs', h_deletelogs, 'Delete server logs', category='trace')
+    _register('config', h_config, 'Show hardware configuration', category='system')
+    _register('upgrade', h_upgrade, 'Hardware upgrade menu', category='system')
+    _register('nextlevel', h_nextlevel, 'Level up (if enough score)', category='system')
+    _register('servers', h_servers, 'List all servers on the network', category='network')
+    _register('scanports', h_scanports, 'Detailed port scan', 'host', category='network')
+    _register('ping', h_ping, 'Ping a server', 'host', category='network')
+    _register('traceroute', h_traceroute, 'Trace route to a server', 'host', category='network')
+    _register('schematic', h_schematic, 'Show network grid', category='network')
+    _register('route', h_route, 'Show network topology', category='network')
+    _register('abort', h_abort, 'Abort current operation', category='system')
+    _register('clear', h_clear, 'Clear the console', aliases=['cls'], category='system')
+    _register('newgame', h_newgame, 'Start a new game', aliases=['reset'], category='system')
+    _register('sound', h_sound, 'Toggle sound effects', category='system')
+    _register('stats', h_stats, 'Show player stats', category='system')
+    _register('alias', h_alias, 'Create a command alias', 'name cmd', category='general')
+    _register('unalias', h_unalias, 'Remove a command alias', 'name', category='general')
+    _register('email', h_email, 'Read Darius emails', category='story')
+    _register('story', h_story, 'Hacker legend missions', category='story')
+    _register('combine', h_combine, 'Combine files (virus factory)', 'file1 file2', category='files')
+    _register('intel', h_intel, 'Show stolen government intel', category='story')
+    _register('sellintel', h_sellintel, 'Sell intel on black market', 'id', category='story')
+    # Phase 5 commands (defined in this file)
+    _register('debugstate', h_debugstate, 'Show internal FSM/service state', category='system')
+    _register('validatecontent', h_validatecontent, 'Validate all modded content', category='system')
+
+
+_register_commands()

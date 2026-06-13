@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Hacker Evolution Server Pool Schema",
+  "description": "Schema for server pool entries in data/servers*.json",
+  "type": "array",
+  "items": {
+    "type": "array",
+    "description": "[name, ports, key_bits, files, money, desc, links_raw]",
+    "prefixItems": [
+      {
+        "type": "string",
+        "description": "Server name / IP"
+      },
+      {
+        "type": "array",
+        "items": { "type": "integer" },
+        "description": "Open port numbers"
+      },
+      {
+        "type": "integer",
+        "minimum": 128,
+        "description": "Encryption key bits"
+      },
+      {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "prefixItems": [
+            { "type": "string" },
+            { "type": "string" }
+          ],
+          "description": "[file_name, file_content]"
+        }
+      },
+      {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Money available on server"
+      },
+      {
+        "type": "string",
+        "description": "Server description"
+      }
+    ],
+    "minItems": 6,
+    "additionalItems": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Raw link targets (optional)"
+    }
+  }
+}
