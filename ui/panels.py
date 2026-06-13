@@ -9,6 +9,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from engine.config import Colors
+from ui.theme import Theme
 from engine.game import g
 from data import HARDWARE, DARIUS_EMAILS, STORY_MISSIONS
 from ui.lang import LANGUAGES, set_lang, get_lang, _, _fmt
@@ -192,20 +193,20 @@ def show_upgrade(self):
         tk.Label(f, text=info, bg=Colors.bg, fg=Colors.cyan,
                  font=('Consolas', 11, 'bold')).pack(side=tk.LEFT, padx=10)
         tk.Label(f, text=_fmt('LVL {}/{}', lvl, maxl), bg=Colors.bg,
-                 fg='#00ff88' if lvl >= maxl else '#ffbb00',
+                 fg=Theme.GREEN if lvl >= maxl else Theme.AMBER,
                  font=('Consolas', 10)).pack(side=tk.LEFT)
         if lvl < maxl:
-            tk.Label(f, text=f'${cost:,}', bg=Colors.bg, fg='#ffbb00',
+            tk.Label(f, text=f'${cost:,}', bg=Colors.bg, fg=Theme.AMBER,
                      font=('Consolas', 10, 'bold')).pack(side=tk.RIGHT, padx=5)
             btn = tk.Button(f, text=_('⬆ UP'), command=lambda t=htype, c=cost: self._do_upgrade(t, c, w),
-                            bg=Colors.dark, fg=Colors.cyan, activebackground='#1a3a6a',
-                            activeforeground=Colors.white, font=('Consolas', 9, 'bold'),
+                            bg=Colors.dark, fg=Colors.cyan, activebackground=Theme.BG_HEADER,
+                            activeforeground=Theme.TEXT, font=('Consolas', 9, 'bold'),
                             relief=tk.RAISED, bd=2, padx=12, pady=2, cursor='hand2')
             btn.pack(side=tk.RIGHT, padx=5)
             if g.money < cost:
                 btn.config(state=tk.DISABLED, fg=Colors.dim)
         else:
-            tk.Label(f, text=_('MAX ✓'), bg=Colors.bg, fg='#00ff88',
+            tk.Label(f, text=_('MAX ✓'), bg=Colors.bg, fg=Theme.GREEN,
                      font=('Consolas', 10, 'bold')).pack(side=tk.RIGHT, padx=10)
         tk.Label(w, text=_(desc), bg=Colors.black, fg=Colors.dim,
                  font=('Consolas', 8)).pack(anchor='w', padx=35)

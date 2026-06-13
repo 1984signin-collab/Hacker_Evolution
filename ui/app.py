@@ -12,10 +12,13 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import winsound
 
-from engine.config import Colors, SAVE_FILE, AUTO_FILE
+from engine.config import SAVE_FILE, AUTO_FILE
 from engine.game import g
 from data import HARDWARE, STORY_MISSIONS, DARIUS_EMAILS
+from ui.theme import Theme
 from ui.rich_bridge import render_to_widget
+from ui.widgets.stat_card import CanvasStatCard, CanvasSectionHeader
+from ui.widgets.sentinel_panel import SentinelPanel
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -25,8 +28,8 @@ from ui.rich_bridge import render_to_widget
 class GlowFrame(tk.Frame):
     def __init__(self, parent, **kw):
         tk.Frame.__init__(self, parent, **kw)
-        self.config(bg=kw.get('bg', Colors.dark),
-                    highlightbackground=Colors.border2, highlightthickness=1,
+        self.config(bg=kw.get('bg', Theme.BG_SURFACE),
+                    highlightbackground=Theme.CYAN_DIM, highlightthickness=1,
                     relief=tk.RIDGE, bd=1)
 
 
@@ -45,7 +48,7 @@ class HackerApp:
         sw = self.root.winfo_screenwidth()
         sh = self.root.winfo_screenheight()
         self.root.geometry(f'{int(sw * 0.88)}x{int(sh * 0.88)}+50+30')
-        self.root.configure(bg=Colors.darker)
+        self.root.configure(bg=Theme.BG_HEADER)
         self.root.minsize(1200, 750)
         self.root.after(100, self._fake_boot_desktop)
 
@@ -64,9 +67,9 @@ class HackerApp:
         self._hex_stream_active = False
         self._noise_band_active = False
 
-        self.hud = HUDBackground(self.root, Colors.black)
+        self.hud = HUDBackground(self.root, Theme.BG_VOID)
 
-        self.main_frame = tk.Frame(self.root, bg=Colors.bg)
+        self.main_frame = tk.Frame(self.root, bg=Theme.BG_VOID)
         self.main_frame.place(relx=0, rely=0, relwidth=1, relheight=1)
 
         self.setup_title()
@@ -80,7 +83,7 @@ class HackerApp:
         self.restart_requested = False
         self._boot_silent = True
         self._boot_state = 'BOOTING'
-        self.root.after(500, self._animate_seps)
+        self.root.after(2000, self._animate_sentinel)
         self.start_ambient()
         # Boot window handles all intro narrative + login drama
         self.root.after(25000, lambda: setattr(self, '_boot_silent', False))
@@ -148,11 +151,11 @@ class HackerApp:
         text, color, speed = self._tw_queue.pop(0)
         self.console.config(state=tk.NORMAL)
         cols = {
-            'green': '#00ff88', 'red': '#ff2244', 'yellow': '#ffbb00',
-            'cyan': '#00ddff', 'orange': '#ff6600', 'dim': '#335577',
-            'white': '#cceeff', 'pink': '#ff0066', 'blue': '#4488ff',
+            'green': Theme.GREEN, 'red': Theme.RED, 'yellow': Theme.AMBER,
+            'cyan': Theme.CYAN, 'orange': Theme.AMBER, 'dim': Theme.TEXT_DIM,
+            'white': Theme.TEXT, 'pink': Theme.MAGENTA, 'blue': Theme.CYAN_MID,
         }
-        c = cols.get(color, Colors.green)
+        c = cols.get(color, Theme.CYAN)
         self._tw_text = text
         self._tw_idx = 0
         self._tw_color = c
@@ -183,11 +186,11 @@ class HackerApp:
         """Output a line with typewriter effect (character by character)."""
         self.console.config(state=tk.NORMAL)
         cols = {
-            'green': '#00ff88', 'red': '#ff2244', 'yellow': '#ffbb00',
-            'cyan': '#00ddff', 'orange': '#ff6600', 'dim': '#335577',
-            'white': '#cceeff', 'pink': '#ff0066', 'blue': '#4488ff',
+            'green': Theme.GREEN, 'red': Theme.RED, 'yellow': Theme.AMBER,
+            'cyan': Theme.CYAN, 'orange': Theme.AMBER, 'dim': Theme.TEXT_DIM,
+            'white': Theme.TEXT, 'pink': Theme.MAGENTA, 'blue': Theme.CYAN_MID,
         }
-        c = cols.get(color, Colors.green)
+        c = cols.get(color, Theme.CYAN)
         self._tw_text = text + '\n'
         self._tw_idx = 0
         self._tw_color = c
@@ -213,7 +216,7 @@ class HackerApp:
         else:
             if self._trace_alarm_on:
                 self._trace_alarm_on = False
-                self.root.config(highlightbackground=Colors.black, highlightthickness=0)
+                self.root.config(highlightbackground=Theme.BG_VOID, highlightthickness=0)
 
     # ═══ FAKE BOOT LINUX ════════════════════════════════════════════════════
 
@@ -447,7 +450,7 @@ class HackerApp:
         self.console.config(state=tk.NORMAL)
         self.console.delete('1.0', tk.END)
         self.console.config(state=tk.DISABLED)
-        self.console_out(_('\n📧 YOU HAVE 1 NEW EMAIL from Darius. Type EMAIL to read it.'), 'yellow')
+        self.console_out(_('\nYOU HAVE 1 NEW EMAIL from Darius. Type EMAIL to read it.'), 'yellow')
         self.console_out(_('Type HELP for commands.'), 'dim')
         g.add_log(_('System online. Darius legacy active.'), 'ok')
         self._beep(660, 30)
@@ -455,299 +458,295 @@ class HackerApp:
     # ═══ TITLE BAR ══════════════════════════════════════════════════════════
 
     def setup_title(self):
-        title = tk.Frame(self.main_frame, bg=Colors.black)
-        title.pack(fill=tk.X, pady=(3, 0))
-        txt = tk.Label(title, text='◈ HACKER EVOLUTION ◈  404 Fun Not Found',
-                       bg=Colors.black, fg=Colors.cyan, font=('Consolas', 18, 'bold'))
-        txt.pack()
-        self.pulse_label(txt)
-        sub = tk.Label(title, text='└── Hacking simulator · exosyphen style ──┘',
-                       bg=Colors.black, fg=Colors.dim, font=('Consolas', 9))
-        sub.pack()
-        gb = tk.Frame(self.main_frame, bg=Colors.bg, height=4)
-        gb.pack(fill=tk.X)
-        self._glow_bar(self.main_frame)
+        title = tk.Frame(self.main_frame, bg=Theme.BG_VOID)
+        title.pack(fill=tk.X, pady=(2, 0))
+        self._title_canvas = tk.Canvas(title, height=52, bg=Theme.BG_VOID,
+                                        highlightthickness=0)
+        self._title_canvas.pack(fill=tk.X)
+        self._draw_title(self._title_canvas)
 
-    def pulse_label(self, lbl, step=0):
-        if not lbl.winfo_exists():
-            return
-        bright = 0.6 + 0.4 * math.sin(step / 20)
-        r = int(20 * bright)
-        gv = int(200 * bright)
-        bv = int(255 * bright)
-        if step > 0 and step % 120 < 3:
-            glitch_off = random.randint(-2, 2)
-            lbl.config(fg=f'#{r + glitch_off:02x}{gv:02x}{bv:02x}')
-            if step % 120 == 0:
-                self._beep(40, 30)
-        else:
-            lbl.config(fg=f'#{r:02x}{gv:02x}{bv:02x}')
-        lbl.after(50, lambda: self.pulse_label(lbl, step + 1))
-
-    # ═══ GLOW BAR ═══════════════════════════════════════════════════════════
-
-    def _glow_bar(self, parent):
-        c = tk.Canvas(parent, height=3, bg=Colors.bg, highlightthickness=0)
-        c.pack(fill=tk.X)
-        c.bind('<Configure>', lambda e: self._draw_glow_bar(c))
-        return c
-
-    def _draw_glow_bar(self, c):
+    def _draw_title(self, c):
         c.delete('all')
         w = c.winfo_width()
-        if w < 10:
+        if w < 100:
+            c.after(50, lambda: self._draw_title(c))
             return
+        # ASCII art header
+        art = [
+            "╔══ HACKER EVOLUTION  ══╗",
+            "║  404 FUN NOT FOUND    ║",
+            "╚═══════════════════════╝",
+        ]
+        y = 4
+        for line in art:
+            c.create_text(w // 2, y, text=line, fill=Theme.CYAN,
+                          font=('Consolas', 12, 'bold'), tags='title')
+            y += 16
+        # Glow bar
         for i in range(w):
-            b = 0.3 + 0.7 * math.sin(i / 10 - math.pi / 2)
-            b = max(0.05, b)
-            r = int(5 * b)
-            gv = int(60 + 80 * b)
-            bl = int(80 + 170 * b)
-            c.create_line(i, 0, i, 3, fill=f'#{r:02x}{gv:02x}{bl:02x}', tags='g')
-        c.lower('g')
-
-    # ═══ ANIMATED SEPARATOR ═════════════════════════════════════════════════
-
-    def _animated_sep(self, parent):
-        c = tk.Canvas(parent, height=6, bg=Colors.bg, highlightthickness=0)
-        c.pack(fill=tk.X)
-        self._sep_canvases.append(c)
-        return c
-
-    def _animate_seps(self):
-        t = self.root.tk.call('clock', 'milliseconds') // 200
-        for c in self._sep_canvases:
-            if c.winfo_exists():
-                self._draw_sep(c, t)
-        if random.random() < 0.08 and g.trace_level > 30:
-            c = self.hud.canvas
-            w = c.winfo_width()
-            h = c.winfo_height()
-            if w > 50:
-                y = random.randint(0, h - 4)
-                alpha = 0.1 + random.random() * 0.15
-                c.create_rectangle(0, y, w, y + random.randint(1, 3),
-                                   fill=f'#{int(255 * alpha):02x}{int(255 * alpha):02x}{int(255 * alpha):02x}',
-                                   outline='', tags='noiseband')
-                self.root.after(100, lambda: c.delete('noiseband'))
-        self.root.after(200, self._animate_seps)
-
-    def _draw_sep(self, c, t):
-        c.delete('all')
-        w = c.winfo_width()
-        if w < 10:
-            return
-        mid = 4
-        seg = 20
-        for i in range(0, w, seg):
-            b = 0.3 + 0.7 * ((math.sin(i / 10 + t) + 1) / 2)
-            r = int(10 + 30 * b)
-            gv = int(40 + 140 * b)
-            bl = int(80 + 160 * b)
-            col = f'#{r:02x}{gv:02x}{bl:02x}'
-            c.create_line(i, mid, i + seg // 2, mid, fill=col, width=2)
-            dot = 0.3 + 0.7 * ((math.sin(i / 10 + t + 1) + 1) / 2)
-            c.create_oval(i + seg // 2 - 1, mid - 1, i + seg // 2 + 1, mid + 1, fill=col, outline='')
+            b = 0.25 + 0.75 * math.sin(i / 12 - math.pi / 2)
+            b = max(0.03, b)
+            r = int(3 * b)
+            gv = int(30 + 60 * b)
+            bl = int(60 + 120 * b)
+            c.create_line(i, 50, i, 52, fill=f'#{r:02x}{gv:02x}{bl:02x}', tags='title')
+        c.lower('title')
 
     # ═══ LAYOUT ═════════════════════════════════════════════════════════════
 
     def setup_layout(self):
         self.root.update_idletasks()
-        avail = max(800, self.root.winfo_width())
-        pw = tk.PanedWindow(self.main_frame, bg=Colors.bg,
-                            sashrelief=tk.RAISED, sashwidth=2, sashpad=0)
-        pw.pack(fill=tk.BOTH, expand=True, padx=5, pady=3)
-        left = tk.Frame(pw, bg=Colors.bg)
-        pw.add(left, width=int(avail * 0.62))
-        cf = tk.Frame(left, bg=Colors.bg)
-        cf.pack(fill=tk.BOTH, expand=True)
-        chdr = tk.Frame(cf, bg=Colors.dark)
+        avail = max(900, self.root.winfo_width())
+
+        # ── Main horizontal split ──
+        body = tk.Frame(self.main_frame, bg=Theme.BG_VOID)
+        body.pack(fill=tk.BOTH, expand=True, padx=4, pady=2)
+
+        # Console column (left ~65%)
+        left = tk.Frame(body, bg=Theme.BG_VOID)
+        left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Console header
+        chdr = tk.Frame(left, bg=Theme.BG_CANVAS)
         chdr.pack(fill=tk.X)
-        tk.Label(chdr, text='▶ CONSOLE', bg=Colors.dark, fg=Colors.cyan,
-                 font=('Consolas', 10, 'bold')).pack(side=tk.LEFT, padx=8, pady=2)
-        tk.Label(chdr, text='[F1=Help]', bg=Colors.dark, fg=Colors.dim,
-                 font=('Consolas', 8)).pack(side=tk.RIGHT, padx=8)
-        dbl = tk.Frame(cf, bg=Colors.bg)
-        dbl.pack(fill=tk.X)
-        tk.Frame(dbl, bg=Colors.cyan2, height=2).pack(fill=tk.X)
-        tk.Frame(dbl, bg=Colors.cyan4, height=1).pack(fill=tk.X)
-        glow_frame = tk.Frame(cf, bg='#004466', highlightthickness=0)
-        glow_frame.pack(fill=tk.BOTH, expand=True, padx=1)
-        self.console = tk.Text(glow_frame, bg=Colors.darker, fg=Colors.cyan,
-                                font=('Consolas', 11), relief=tk.FLAT, padx=8, pady=5,
-                                height=18, wrap=tk.WORD, state=tk.DISABLED, borderwidth=0)
-        self.console.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
-        self.console.configure(insertbackground=Colors.cyan, insertwidth=7,
-                                insertofftime=300, insertontime=600)
-        sbar = tk.Scrollbar(cf, orient=tk.VERTICAL, command=self.console.yview,
-                            bg=Colors.dark, troughcolor=Colors.black,
-                            activebackground=Colors.green, width=10)
+        tk.Label(chdr, text='[ CONSOLE ]', bg=Theme.BG_CANVAS, fg=Theme.CYAN,
+                 font=('Consolas', 9, 'bold')).pack(side=tk.LEFT, padx=8, pady=3)
+        tk.Label(chdr, text='F1=Help  Tab=Complete', bg=Theme.BG_CANVAS,
+                 fg=Theme.TEXT_DIM, font=('Consolas', 8)).pack(side=tk.RIGHT, padx=8)
+
+        # Console frame with glow border
+        glow_frame = tk.Frame(left, bg=Theme.BG_SURFACE, highlightthickness=0)
+        glow_frame.pack(fill=tk.BOTH, expand=True, pady=1)
+
+        self.console = tk.Text(glow_frame, bg=Theme.BG_VOID, fg=Theme.CYAN,
+                               font=('Consolas', 11), relief=tk.FLAT, padx=8, pady=5,
+                               height=18, wrap=tk.WORD, state=tk.DISABLED, borderwidth=0,
+                               insertbackground=Theme.CYAN, insertwidth=7,
+                               insertofftime=300, insertontime=600)
+        self.console.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
+
+        sbar = tk.Scrollbar(glow_frame, orient=tk.VERTICAL, command=self.console.yview,
+                            bg=Theme.BG_CANVAS, troughcolor=Theme.BG_VOID,
+                            activebackground=Theme.CYAN, width=10)
         self.console.configure(yscrollcommand=sbar.set, highlightthickness=0)
         sbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.console.pack(fill=tk.BOTH, expand=True)
-        inp = tk.Frame(cf, bg=Colors.dark, height=32)
+
+        # Input line
+        inp = tk.Frame(left, bg=Theme.BG_CANVAS, height=32)
         inp.pack(fill=tk.X)
-        self.prompt_label = tk.Label(inp, text='root@hud:~$ ', bg=Colors.dark,
-                                      fg=Colors.cyan, font=('Consolas', 12, 'bold'), padx=5)
+        self.prompt_label = tk.Label(inp, text='root@hud:~$ ', bg=Theme.BG_CANVAS,
+                                     fg=Theme.CYAN, font=('Consolas', 12, 'bold'), padx=5)
         self.prompt_label.pack(side=tk.LEFT)
-        self.cursor_label = tk.Label(inp, text='█', bg=Colors.dark, fg=Colors.cyan,
-                                      font=('Consolas', 12, 'bold'))
+        self.cursor_label = tk.Label(inp, text='█', bg=Theme.BG_CANVAS,
+                                     fg=Theme.CYAN, font=('Consolas', 12, 'bold'))
         self.cursor_label.pack(side=tk.LEFT, padx=(0, 2))
         self._blink_cursor()
+
         self.input_var = tk.StringVar()
         self.input = tk.Entry(inp, textvariable=self.input_var,
-                              bg=Colors.dark, fg=Colors.cyan, insertbackground=Colors.cyan,
+                              bg=Theme.BG_CANVAS, fg=Theme.CYAN,
+                              insertbackground=Theme.CYAN,
                               font=('Consolas', 12), relief=tk.FLAT, bd=0,
-                              highlightthickness=0, disabledbackground=Colors.dark)
+                              highlightthickness=0, disabledbackground=Theme.BG_CANVAS)
         self.input.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
         self.input.focus()
         self.input.bind('<Return>', self.on_cmd)
         self.input.bind('<Up>', lambda e: self.history(-1))
         self.input.bind('<Down>', lambda e: self.history(1))
-        self.input.bind('<Key>', lambda e: (self._sound_keypress(), self.root.after(5, self._input_glow)))
+        self.input.bind('<Key>', lambda e: (self._sound_keypress(),
+                         self.root.after(5, self._input_glow)))
         self._input_glow_active = False
-        self._build_layout_rest(left, pw, avail)
+        self._input_glow()
+        self.input.config(highlightthickness=0)
+
+        # ── Right panel (Canvas-drawn HUD) ──
+        right_w = min(360, int(avail * 0.33))
+        right_frame = tk.Frame(body, bg=Theme.BG_VOID, width=right_w)
+        right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=(4, 0))
+        right_frame.pack_propagate(False)
+
+        self._right_canvas = tk.Canvas(right_frame, bg=Theme.BG_VOID,
+                                       highlightthickness=0, width=right_w)
+        self._right_canvas.pack(fill=tk.BOTH, expand=True)
+
+        # ── Map area (bottom, full width) ──
+        map_frame = tk.Frame(self.main_frame, bg=Theme.BG_VOID, height=195)
+        map_frame.pack(fill=tk.X, pady=(1, 0))
+        # Map header
+        map_hdr = tk.Frame(map_frame, bg=Theme.BG_CANVAS)
+        map_hdr.pack(fill=tk.X)
+        tk.Label(map_hdr, text='[ NETWORK TOPOLOGY ]', bg=Theme.BG_CANVAS,
+                 fg=Theme.CYAN, font=('Consolas', 9, 'bold')).pack(side=tk.LEFT, padx=8, pady=2)
+        self._map_status = tk.Label(map_hdr, text='', bg=Theme.BG_CANVAS,
+                                    fg=Theme.TEXT_DIM, font=('Consolas', 8))
+        self._map_status.pack(side=tk.RIGHT, padx=8)
+        self.map_canvas = tk.Canvas(map_frame, bg=Theme.BG_VOID,
+                                    highlightthickness=0, height=160)
+        self.map_canvas.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
+        self.map_canvas.bind('<Button-1>', self.map_click)
+        self.map_canvas.bind('<Button-3>', self.map_right_click)
+
+        # ── Status bar ──
+        self._status_bar = tk.Frame(self.main_frame, bg=Theme.BG_CANVAS, height=22)
+        self._status_bar.pack(fill=tk.X)
+        self._status_labels = {}
+        for side, items in [
+            (tk.LEFT, [('_ip', 'IP: --', Theme.TEXT_DIM)]),
+            (tk.RIGHT, [('_conn', 'DISCONNECTED', Theme.MAGENTA),
+                        ('_trace_s', 'TRACE: 0%', Theme.GREEN)]),
+        ]:
+            for key, txt, col in items:
+                lb = tk.Label(self._status_bar, text=txt, bg=Theme.BG_CANVAS,
+                              fg=col, font=('Consolas', 8))
+                lb.pack(side=side, padx=8)
+                self._status_labels[key] = lb
+
+        # ── Draw right panel contents ──
+        self._build_right_panel()
+
+    def _build_right_panel(self):
+        c = self._right_canvas
+        cw = int(c.cget('width'))
+
+        # Base background with grid dots
+        for x in range(0, cw, 20):
+            for y in range(0, 1200, 20):
+                if (x + y) % 40 == 0:
+                    c.create_oval(x - 1, y - 1, x + 2, y + 2,
+                                  fill=Theme.CYAN_ULTRADIM, outline='', tags='bg')
+
+        # ── Stat cards (2x2 grid) ──
+        card_w = (cw - 16) // 2
+        card_h = 60
+        x0 = 4
+        y0 = 4
+        self._stat_cards = {}
+        stats = [
+            ('money',   'MONEY',    Theme.GREEN),
+            ('score',   'SCORE',    Theme.CYAN),
+            ('trace',   'TRACE',    Theme.RED),
+            ('level',   'LEVEL',    Theme.CYAN_MID),
+        ]
+        for i, (key, label, color) in enumerate(stats):
+            col = i % 2
+            row = i // 2
+            x = x0 + col * (card_w + 6)
+            y = y0 + row * (card_h + 6)
+            card = CanvasStatCard(c, x, y, label, '-', color, card_w, card_h)
+            self._stat_cards[key] = card
+
+        # ── Quick stats row ──
+        qy = y0 + 2 * (card_h + 6) + 4
+        CanvasSectionHeader(c, 4, qy, 'STATUS', cw - 8, Theme.CYAN_MID)
+        qy += 18
+        self._quick_labels = {}
+        for i, (key, label) in enumerate([('hacks', 'HACKS'), ('alerts', 'ALERTS')]):
+            x = 8 + i * ((cw - 16) // 2 + 4)
+            c.create_text(x, qy, text=label, fill=Theme.TEXT_DIM,
+                          font=('Consolas', 8), anchor='w', tags='q')
+            v = c.create_text(x + 80, qy, text='-', fill=Theme.GREEN if i == 0 else Theme.AMBER,
+                              font=('Consolas', 9, 'bold'), anchor='e', tags='q')
+            self._quick_labels[key] = v
+
+        # ── Bounce ──
+        by = qy + 16
+        c.create_text(8, by, text='BOUNCE', fill=Theme.TEXT_DIM,
+                      font=('Consolas', 8), anchor='w', tags='q')
+        self._bounce_label = c.create_text(cw - 8, by, text='0 hop',
+                                           fill=Theme.MAGENTA,
+                                           font=('Consolas', 9, 'bold'),
+                                           anchor='e', tags='q')
+
+        # ── Sentinel AI ──
+        sy = by + 20
+        self._sentinel = SentinelPanel(c, 4, sy, cw - 8)
+
+        # ── Hardware section ──
+        hy = sy + SentinelPanel.HEIGHT + 8
+        CanvasSectionHeader(c, 4, hy, 'HARDWARE', cw - 8, Theme.CYAN_MID)
+        hy += 18
+        self._hw_items = {}
+        for i, h in enumerate(HARDWARE):
+            y = hy + i * 18
+            c.create_text(8, y, text=h[0][:14], fill=Theme.TEXT_DIM,
+                          font=('Consolas', 8), anchor='w', tags='hw')
+            v = c.create_text(cw - 8, y, text='-', fill=Theme.CYAN,
+                              font=('Consolas', 8, 'bold'), anchor='e', tags='hw')
+            self._hw_items[h[1]] = v
+
+        # ── Objectives section ──
+        oy = hy + len(HARDWARE) * 18 + 4
+        CanvasSectionHeader(c, 4, oy, 'OBJECTIVES', cw - 8, Theme.CYAN_MID)
+        oy += 18
+        self._obj_items = []
+        for _ in range(4):
+            t = c.create_text(8, oy, text='', fill=Theme.TEXT_DIM,
+                              font=('Consolas', 8), anchor='w', tags='obj')
+            oy += 16
+            self._obj_items.append(t)
+
+        # ── Action buttons ──
+        ay = oy + 6
+        self._action_btns = []
+        btn_w = (cw - 20) // 3
+        for i, (txt, cmd) in enumerate([
+            ('SAVE', self.save), ('LOAD', self.load), ('UPGRADE', self.show_upgrade),
+        ]):
+            x = 4 + i * (btn_w + 4)
+            self._draw_button(x, ay, btn_w, 24, txt, cmd)
+
+        # Full panel bg
+        c.lower('bg')
+
+    def _draw_button(self, x, y, w, h, text, command):
+        c = self._right_canvas
+        tag = f'btn_{id(self)}_{text}'
+        # Button bg
+        c.create_rectangle(x, y, x + w, y + h,
+                           fill=Theme.BG_SURFACE, outline=Theme.CYAN_ULTRADIM,
+                           width=1, tags=tag)
+        # Button text
+        c.create_text(x + w // 2, y + h // 2, text=text,
+                      fill=Theme.CYAN, font=('Consolas', 8, 'bold'), tags=tag)
+        # Click handler
+        rid = c.create_rectangle(x, y, x + w, y + h,
+                                 fill='', outline='', tags=(tag, '_btn_click'))
+        c.tag_bind(rid, '<Button-1>', lambda e, cmd=command: cmd())
+        c.tag_bind(rid, '<Enter>', lambda e, xx=x, yy=y, ww=w, hh=h, tag=tag:
+                   c.itemconfigure(tag, fill=Theme.BG_HEADER))
+        c.tag_bind(rid, '<Leave>', lambda e, tag=tag:
+                   c.itemconfigure(tag, fill=Theme.BG_SURFACE))
 
     def _input_glow(self):
         if self._input_glow_active:
             return
         self._input_glow_active = True
-        self.input.config(bg=Colors.dark, highlightbackground=Colors.cyan, highlightthickness=1)
-        self.root.after(150, lambda: self.input.config(highlightthickness=0) if self._input_glow_active else None)
+        self.input.config(bg=Theme.BG_CANVAS, highlightbackground=Theme.CYAN,
+                          highlightthickness=1)
+        self.root.after(150, lambda: self.input.config(highlightthickness=0)
+                        if self._input_glow_active else None)
         self.root.after(200, lambda: setattr(self, '_input_glow_active', False))
-
-    def _build_layout_rest(self, left, pw, avail):
-        # Map
-        mf = tk.Frame(left, bg=Colors.black, height=190)
-        mf.pack(fill=tk.X)
-        self.map_canvas = tk.Canvas(mf, bg=Colors.darker, highlightthickness=0, height=185)
-        self.map_canvas.pack(fill=tk.BOTH, expand=True, padx=1, pady=2)
-        self.map_canvas.bind('<Button-1>', self.map_click)
-        self.map_canvas.bind('<Button-3>', self.map_right_click)
-
-        # Right panel
-        right = tk.Frame(pw, bg=Colors.bg)
-        pw.add(right, width=int(avail * 0.35))
-
-        # System Panel
-        sf = tk.LabelFrame(right, text=' SYSTEM PANEL ', bg=Colors.bg,
-                           fg=Colors.cyan, font=('Consolas', 10, 'bold'),
-                           relief=tk.RIDGE, bd=2, padx=12, pady=8,
-                           highlightbackground=Colors.border2, highlightthickness=2)
-        sf.pack(fill=tk.X, pady=(0, 5))
-        self.sys = {}
-        for k, lbl, unit, clr in [
-            ('money', _('💰 Money'), '', '#ffbb00'),
-            ('trace', '⚠️ Trace', '%', '#ff2244'),
-            ('score', '🏆 Score', '', '#00ff88'),
-            ('level', '📊 Level', '', '#00ddff'),
-            ('hacks', '💻 Hack', '', '#00ff88'),
-            ('trace_cnt', '🕵️ Traced', '', '#ff6600'),
-        ]:
-            f = tk.Frame(sf, bg=Colors.bg)
-            f.pack(fill=tk.X, pady=1)
-            tk.Label(f, text=lbl, bg=Colors.bg, fg=Colors.dim,
-                     font=('Consolas', 9), anchor='w', width=14).pack(side=tk.LEFT)
-            lb = tk.Label(f, text='-', bg=Colors.bg, fg=clr,
-                          font=('Consolas', 11, 'bold'), anchor='e')
-            lb.pack(side=tk.RIGHT)
-            self.sys[k] = lb
-
-        # Trace bar
-        tf = tk.Frame(sf, bg=Colors.bg)
-        tf.pack(fill=tk.X, pady=3)
-        tk.Label(tf, text='[', bg=Colors.bg, fg=Colors.dim,
-                 font=('Consolas', 8)).pack(side=tk.LEFT)
-        self.trace_canvas = tk.Canvas(tf, bg=Colors.dark, highlightthickness=0, height=12, width=200)
-        self.trace_canvas.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=2)
-        tk.Label(tf, text=']', bg=Colors.bg, fg=Colors.dim,
-                 font=('Consolas', 8)).pack(side=tk.LEFT)
-
-        # Bounce
-        bf = tk.Frame(sf, bg=Colors.bg)
-        bf.pack(fill=tk.X, pady=2)
-        tk.Label(bf, text='🔁 BOUNCE', bg=Colors.bg, fg=Colors.dim,
-                 font=('Consolas', 9)).pack(side=tk.LEFT)
-        self.bounce_lbl = tk.Label(bf, text='0 hop', bg=Colors.bg, fg='#ff0066',
-                                   font=('Consolas', 11, 'bold'))
-        self.bounce_lbl.pack(side=tk.RIGHT)
-
-        # Hardware
-        self._animated_sep(right)
-        hw = tk.LabelFrame(right, text=' HARDWARE ', bg=Colors.bg,
-                           fg=Colors.cyan, font=('Consolas', 9, 'bold'),
-                           relief=tk.RIDGE, bd=2, highlightbackground=Colors.border2, highlightthickness=1)
-        hw.pack(fill=tk.X, pady=(0, 5))
-        self.hw_lbls = {}
-        for h in HARDWARE:
-            f = tk.Frame(hw, bg=Colors.bg)
-            f.pack(fill=tk.X, pady=1)
-            tk.Label(f, text=h[0], bg=Colors.bg, fg=Colors.dim,
-                     font=('Consolas', 9), anchor='w', width=16).pack(side=tk.LEFT, padx=5)
-            lb = tk.Label(f, text='-', bg=Colors.bg, fg=Colors.cyan,
-                          font=('Consolas', 9, 'bold'), anchor='e')
-            lb.pack(side=tk.RIGHT, padx=5)
-            self.hw_lbls[h[1]] = lb
-
-        # Progress bar
-        self.pf = tk.Frame(right, bg=Colors.bg)
-        self.pv = tk.DoubleVar()
-        self.pb = ttk.Progressbar(self.pf, variable=self.pv, length=300,
-                                   mode='determinate', style='cyan.Horizontal.TProgressbar')
-        self.pb.pack(pady=(5, 0))
-        self.ps = tk.Label(self.pf, text='', bg=Colors.bg, fg=Colors.cyan,
-                           font=('Consolas', 10))
-        self.ps.pack()
-        style = ttk.Style()
-        style.configure('cyan.Horizontal.TProgressbar', background='#00ddff', troughcolor='#0a1830')
-        self.pf.pack_forget()
-
-        # Messages
-        self._animated_sep(right)
-        mg = tk.LabelFrame(right, text=' MESSAGES ', bg=Colors.bg,
-                           fg=Colors.cyan, font=('Consolas', 9, 'bold'),
-                           relief=tk.RIDGE, bd=2, highlightbackground=Colors.border2, highlightthickness=1)
-        mg.pack(fill=tk.BOTH, expand=True)
-        self.msg = tk.Text(mg, bg=Colors.darker, fg=Colors.cyan,
-                           font=('Consolas', 10), relief=tk.FLAT, height=6, state=tk.DISABLED)
-        self.msg.pack(fill=tk.BOTH, expand=True, pady=2, padx=2)
-
-        # Buttons
-        btn = tk.Frame(right, bg=Colors.bg)
-        btn.pack(fill=tk.X, pady=2)
-        for t, c in [
-            ('💾 Save', self.save),
-            ('📂 Load', self.load),
-            ('📤 Export', self.export),
-            ('📥 Import', self.import_),
-            ('🔧 Upgrade', self.show_upgrade),
-            ('⚙ Config', self.show_config),
-        ]:
-            tk.Button(btn, text=t, command=c, bg=Colors.dark, fg=Colors.cyan,
-                      activebackground='#1a3a6a', activeforeground=Colors.white,
-                      font=('Consolas', 9), relief=tk.RAISED, bd=1, padx=6, pady=2,
-                      cursor='hand2').pack(side=tk.LEFT, padx=1)
 
     # ═══ MENU ═══════════════════════════════════════════════════════════════
 
     def setup_menu(self):
-        mb = tk.Menu(self.root, bg=Colors.dark, fg=Colors.cyan,
-                     activebackground='#1a3a6a', activeforeground=Colors.white)
+        mb = tk.Menu(self.root, bg=Theme.BG_HEADER, fg=Theme.CYAN_MID,
+                     activebackground=Theme.BG_HEADER, activeforeground=Theme.TEXT)
         self.root.config(menu=mb)
-        fm = tk.Menu(mb, tearoff=0, bg=Colors.dark, fg=Colors.cyan,
-                     activebackground='#1a3a6a', activeforeground=Colors.white)
-        mb.add_cascade(label='File', menu=fm)
-        fm.add_command(label='🆕 Nuova Partita', command=self.h_newgame_wrapper)
+        fm = tk.Menu(mb, tearoff=0, bg=Theme.BG_HEADER, fg=Theme.CYAN_MID,
+                     activebackground=Theme.BG_HEADER, activeforeground=Theme.TEXT)
+        mb.add_cascade(label='FILE', menu=fm)
+        fm.add_command(label='NEW GAME', command=self.h_newgame_wrapper)
         fm.add_separator()
-        fm.add_command(label='💾 Salva', command=self.save)
-        fm.add_command(label='📂 Carica', command=self.load)
+        fm.add_command(label='SAVE', command=self.save)
+        fm.add_command(label='LOAD', command=self.load)
         fm.add_separator()
-        fm.add_command(label='📤 Export...', command=self.export)
-        fm.add_command(label='📥 Import...', command=self.import_)
+        fm.add_command(label='EXPORT...', command=self.export)
+        fm.add_command(label='IMPORT...', command=self.import_)
         fm.add_separator()
-        fm.add_command(label='⚙ Settings', command=self.show_config)
+        fm.add_command(label='SETTINGS', command=self.show_config)
         fm.add_separator()
-        fm.add_command(label='🚪 Esci', command=self.on_close)
+        fm.add_command(label='QUIT', command=self.on_close)
 
     # ═══ BINDINGS ═══════════════════════════════════════════════════════════
 
@@ -770,11 +769,11 @@ class HackerApp:
     def console_out(self, text, color='green'):
         self.console.config(state=tk.NORMAL)
         cols = {
-            'green': '#00ff88', 'red': '#ff2244', 'yellow': '#ffbb00',
-            'cyan': '#00ddff', 'orange': '#ff6600', 'dim': '#335577',
-            'white': '#cceeff', 'pink': '#ff0066', 'blue': '#4488ff',
+            'green': Theme.GREEN, 'red': Theme.RED, 'yellow': Theme.AMBER,
+            'cyan': Theme.CYAN, 'orange': Theme.AMBER, 'dim': Theme.TEXT_DIM,
+            'white': Theme.TEXT, 'pink': Theme.MAGENTA, 'blue': Theme.CYAN_MID,
         }
-        c = cols.get(color, Colors.green)
+        c = cols.get(color, Theme.CYAN)
         self.console.insert(tk.END, text + '\n')
         self.console.tag_add('c', 'end-2l', 'end-1l')
         self.console.tag_config('c', foreground=c)
@@ -930,22 +929,27 @@ class HackerApp:
 
         tick()
 
+    def _animate_sentinel(self):
+        if hasattr(self, '_sentinel'):
+            self._sentinel.animate()
+        self.root.after(500, self._animate_sentinel)
+
     def _update_prompt(self):
         if not hasattr(self, 'prompt_label'):
             return
         if g.current_server:
-            self.prompt_label.config(text=f'root@{g.current_server["name"].split(".")[0]}:~$ ', fg=Colors.green)
+            self.prompt_label.config(text=f'root@{g.current_server["name"].split(".")[0]}:~$ ', fg=Theme.GREEN)
         else:
-            self.prompt_label.config(text='root@hud:~$ ', fg=Colors.cyan)
+            self.prompt_label.config(text='root@hud:~$ ', fg=Theme.CYAN)
 
     def _impact_wave(self, cx, cy):
         for r in range(5, 80, 5):
             self.root.after(r * 5, lambda rr=r: self._draw_impact_ring(cx, cy, rr) if self.map_canvas.winfo_exists() else None)
-        self._particle_burst(cx, cy, Colors.cyan, 30)
+        self._particle_burst(cx, cy, Theme.CYAN, 30)
         self._screen_shake(200, 2)
 
     def _draw_impact_ring(self, cx, cy, r):
-        self.map_canvas.create_oval(cx - r, cy - r, cx + r, cy + r, outline=Colors.cyan, width=2, tags='impact')
+        self.map_canvas.create_oval(cx - r, cy - r, cx + r, cy + r, outline=Theme.CYAN, width=2, tags='impact')
         self.root.after(120, lambda: self.map_canvas.delete('impact'))
 
     # ═══ PARTICLE BURST ═════════════════════════════════════════════════════
@@ -973,23 +977,25 @@ class HackerApp:
     def update_map(self):
         self.map_canvas.delete('all')
         w = self.map_canvas.winfo_width() or 600
-        h = self.map_canvas.winfo_height() or 185
+        h = self.map_canvas.winfo_height() or 160
         n = len(g.servers)
         if n == 0:
             return
         cx, cy = w // 2, h // 2
-        radius = min(w, h) * 0.32
+        radius = min(w, h) * 0.35
 
-        # Radar grid
+        # Radar grid — ultra-dim teal
         step_ = max(1, int(radius * 0.25))
         for rng in range(step_, int(radius) + 1, step_):
             self.map_canvas.create_oval(cx - rng, cy - rng, cx + rng, cy + rng,
-                                        outline=Colors.grid, width=1, tags='map')
-        self.map_canvas.create_line(cx - radius, cy, cx + radius, cy, fill=Colors.grid, width=1, tags='map')
-        self.map_canvas.create_line(cx, cy - radius, cx, cy + radius, fill=Colors.grid, width=1, tags='map')
-        self.map_canvas.create_line(cx - radius, cy - radius, cx + radius, cy + radius, fill=Colors.grid, width=1, tags='map')
-        self.map_canvas.create_line(cx + radius, cy - radius, cx - radius, cy + radius, fill=Colors.grid, width=1, tags='map')
-        self.map_canvas.create_oval(cx - 3, cy - 3, cx + 3, cy + 3, fill=Colors.cyan3, outline='', tags='map')
+                                        outline=Theme.CYAN_ULTRADIM, width=1, tags='map')
+        for a in [0, math.pi / 4, math.pi / 2, 3 * math.pi / 4]:
+            dx = radius * math.cos(a)
+            dy = radius * math.sin(a)
+            self.map_canvas.create_line(cx - dx, cy - dy, cx + dx, cy + dy,
+                                        fill=Theme.CYAN_ULTRADIM, width=1, tags='map')
+        self.map_canvas.create_oval(cx - 3, cy - 3, cx + 3, cy + 3,
+                                    fill=Theme.CYAN_DIM, outline='', tags='map')
 
         # Node positions
         for i, s in enumerate(g.servers):
@@ -1003,17 +1009,17 @@ class HackerApp:
         rx = cx + radius * math.cos(radar_angle)
         ry = cy + radius * math.sin(radar_angle)
         for ri in range(20, 0, -1):
+            alpha = 0.12 * (1 - ri / 20)
             a2 = radar_angle - 0.03 * ri
-            alpha = 0.15 * (1 - ri / 20)
             rrx = cx + radius * 0.3 * math.cos(a2)
             rry = cy + radius * 0.3 * math.sin(a2)
             self.map_canvas.create_line(cx, cy, rrx, rry,
-                                        fill=f'#{int(255 * alpha):02x}{int(255 * alpha):02x}{int(255 * alpha):02x}',
+                                        fill=Theme.rgba(Theme.CYAN, alpha),
                                         width=ri // 4 + 1, tags='mapradar')
-        self.map_canvas.create_line(cx, cy, rx, ry, fill=Colors.cyan, width=2, tags='mapradar')
+        self.map_canvas.create_line(cx, cy, rx, ry, fill=Theme.CYAN, width=2, tags='mapradar')
         self.root.after(500, lambda: self.map_canvas.delete('mapradar'))
 
-        # Connection lines
+        # Connection lines — teal
         now_t = time.time()
         for i, s1 in enumerate(g.servers):
             x1, y1 = s1['pos']
@@ -1024,17 +1030,17 @@ class HackerApp:
                 steps = max(1, int(dist / 8))
                 for s_ in range(steps):
                     t1, t2 = s_ / steps, (s_ + 1) / steps
-                    bright = 0.15 + 0.2 * math.sin(t1 * math.pi)
-                    bv = int(255 * bright)
-                    gv = int(180 * bright)
-                    self.map_canvas.create_line(x1 + dx * t1, y1 + dy * t1, x1 + dx * t2, y1 + dy * t2,
-                                                fill=f'#{gv:02x}{gv:02x}{bv:02x}', width=1, tags='map')
+                    bright = 0.1 + 0.15 * math.sin(t1 * math.pi)
+                    self.map_canvas.create_line(
+                        x1 + dx * t1, y1 + dy * t1, x1 + dx * t2, y1 + dy * t2,
+                        fill=f'#{int(15 * bright):02x}{int(40 * bright):02x}{int(40 * bright):02x}',
+                        width=1, tags='map')
                 if (i + j + int(now_t * 2)) % 3 == 0:
                     tt = (now_t * 0.5 + (i * 7 + j * 13) * 0.01) % 1
                     px, py = x1 + dx * tt, y1 + dy * tt
                     sz = 1 + int(0.5 + 0.5 * math.sin(tt * math.pi))
                     self.map_canvas.create_oval(px - sz, py - sz, px + sz, py + sz,
-                                                fill=Colors.cyan, outline='', tags='map')
+                                                fill=Theme.CYAN, outline='', tags='map')
 
         # Bounce lines
         for bi in range(1, len(g.bounce_chain)):
@@ -1045,26 +1051,14 @@ class HackerApp:
             if p1 and p2:
                 x1, y1 = p1['pos']
                 x2, y2 = p2['pos']
-                bright = 0.5 + 0.3 * math.sin(self.bounce_anim / 8 + bi * 1.5)
-                gv = int(180 * bright)
-                bv = int(255 * bright)
-                col = f'#{gv:02x}{gv:02x}{bv:02x}'
-                self.map_canvas.create_line(x1, y1, x2, y2, fill=Colors.cyan4, width=7, tags='map')
-                self.map_canvas.create_line(x1, y1, x2, y2, fill=col, width=4, tags='map')
-                self.map_canvas.create_line(x1, y1, x2, y2, fill=Colors.cyan, width=2, tags='map')
+                col = Theme.CYAN
+                self.map_canvas.create_line(x1, y1, x2, y2, fill=Theme.CYAN_ULTRADIM, width=7, tags='map')
+                self.map_canvas.create_line(x1, y1, x2, y2, fill=col, width=3, tags='map')
                 t = (self.bounce_anim / 30) % 1
                 px, py = x1 + (x2 - x1) * t, y1 + (y2 - y1) * t
-                pulse = 0.5 + 0.5 * math.sin(self.bounce_anim / 5)
-                sz = 2 + int(pulse * 2)
+                sz = 2 + int(1.5 * (0.5 + 0.5 * math.sin(self.bounce_anim / 5)))
                 self.map_canvas.create_oval(px - sz, py - sz, px + sz, py + sz,
-                                            fill=Colors.cyan, outline=Colors.white, width=1, tags='map')
-                for tt in range(3):
-                    tt_ = (t - 0.1 * (tt + 1)) % 1
-                    tpx, tpy = x1 + (x2 - x1) * tt_, y1 + (y2 - y1) * tt_
-                    tb = 0.3 - 0.1 * tt
-                    self.map_canvas.create_oval(tpx - 2, tpy - 2, tpx + 2, tpy + 2,
-                                                fill=f'#{int(100 * tb):02x}{int(100 * tb):02x}{int(255 * tb):02x}',
-                                                outline='', tags='map')
+                                            fill=Theme.CYAN, outline=Theme.TEXT, width=1, tags='map')
 
         # Nodes
         now = time.time()
@@ -1072,76 +1066,76 @@ class HackerApp:
             x, y = s['pos']
             is_hacked = g.hacked(s)
             if is_hacked:
-                col, fill = Colors.green, Colors.cyan4
-                icon = '✓'
+                col, fill, icon = Theme.GREEN, Theme.CYAN_ULTRADIM, '✓'
             elif s['decrypted']:
-                col, fill = Colors.yellow, Colors.dark
-                icon = '◉'
+                col, fill, icon = Theme.AMBER, Theme.BG_CANVAS, '◉'
             elif s['scanned']:
-                col, fill = Colors.orange, Colors.dark
-                icon = '◌'
+                col, fill, icon = Theme.AMBER, Theme.BG_CANVAS, '◌'
             else:
-                col, fill = Colors.cyan3, Colors.darker
-                icon = '○'
+                col, fill, icon = Theme.CYAN_DIM, Theme.BG_VOID, '○'
             in_bounce = s['name'] in g.bounce_chain
             is_connected = s is g.current_server
             r = 9 if not in_bounce else 13
             glow_r = 18 if in_bounce else 14
             if is_connected:
                 r, glow_r = 15, 22
-            rh = int(col[1:3], 16)
-            gh = int(col[3:5], 16)
-            bh = int(col[5:7], 16)
+
+            # Glow layers
             for layer in range(3, 0, -1):
                 lr = glow_r * layer / 3
-                lc = f'#{rh * layer // 3:02x}{gh * layer // 3:02x}{bh * layer // 3:02x}'
+                frac = layer / 3
+                lc = Theme.alpha(col, frac * 0.5)
                 self.map_canvas.create_oval(x - lr, y - lr, x + lr, y + lr,
                                             outline='', fill=lc, tags='map')
+            # Hacked pulse
             if is_hacked:
                 p = 0.5 + 0.5 * math.sin(now * 3)
                 pr = glow_r + 4 + int(p * 6)
-                pc = f'#{int(80 + 175 * p):02x}{int(150 + 105 * p):02x}{int(255):02x}'
+                pc = Theme.rgba(Theme.GREEN, 0.3 + 0.7 * p)
                 self.map_canvas.create_oval(x - pr, y - pr, x + pr, y + pr,
                                             outline=pc, width=2, tags='map')
+            # Connected ring
             if is_connected:
                 cr = glow_r + 8
                 self.map_canvas.create_oval(x - cr, y - cr, x + cr, y + cr,
-                                            outline=Colors.cyan, width=1, dash=(3, 3), tags='map')
+                                            outline=Theme.CYAN, width=1, dash=(3, 3), tags='map')
+            # Node body
             self.map_canvas.create_oval(x - r, y - r, x + r, y + r,
                                         outline=col, fill=fill, width=2, tags='map')
             if is_hacked or s['decrypted']:
                 hi = r * 0.4
                 self.map_canvas.create_oval(x - hi, y - hi, x + hi, y + hi,
-                                            outline='', fill=Colors.cyan if is_hacked else Colors.yellow, tags='map')
+                                            outline='', fill=Theme.GREEN if is_hacked else Theme.AMBER, tags='map')
+            # Icon — no emoji
             desc_lower = s['desc'].lower()
             if 'bank' in desc_lower or 'atm' in desc_lower:
                 icon = '$'
             elif 'military' in desc_lower or 'satellite' in desc_lower:
-                icon = '⚠'
+                icon = '!'
             elif 'gsm' in desc_lower or 'tower' in desc_lower:
-                icon = '📡'
+                icon = '~'
             elif 'corporate' in desc_lower or 'mainframe' in desc_lower:
-                icon = '🏢'
-            elif 'car' in desc_lower or 'traffic' in desc_lower:
-                icon = '🚦'
+                icon = '#'
             elif 'office' in desc_lower:
-                icon = '💻'
-            if s.get('is_gov'):
-                icon = '🏛️'
-            self.map_canvas.create_text(x + 1, y - r - 9, text=s['name'][:28],
-                                        fill='#000000', font=('Consolas', 8, 'bold'), anchor='s', tags='map')
+                icon = '@'
+            elif s.get('is_gov'):
+                icon = 'G'
+
+            # Labels
             self.map_canvas.create_text(x, y - r - 10, text=s['name'][:28],
                                         fill=col, font=('Consolas', 8, 'bold'), anchor='s', tags='map')
             self.map_canvas.create_text(x, y - r - 24, text=icon,
                                         fill=col, font=('Consolas', 9), anchor='s', tags='map')
             if s['scanned']:
-                self.map_canvas.create_text(x + 1, y + r + 6, text='/'.join(str(p) for p in s['ports']),
-                                            fill='#000000', font=('Consolas', 7), anchor='n', tags='map')
                 self.map_canvas.create_text(x, y + r + 5, text='/'.join(str(p) for p in s['ports']),
-                                            fill=Colors.cyan3, font=('Consolas', 7), anchor='n', tags='map')
+                                            fill=Theme.CYAN_DIM, font=('Consolas', 7), anchor='n', tags='map')
             if is_connected:
                 self.map_canvas.create_text(x, y + r + 16, text='← CONNECTED',
-                                            fill=Colors.cyan, font=('Consolas', 7, 'bold'), anchor='n', tags='map')
+                                            fill=Theme.GREEN, font=('Consolas', 7, 'bold'), anchor='n', tags='map')
+
+        # Map status
+        hacked_count = sum(1 for s in g.servers if g.hacked(s))
+        self._map_status.config(text=f'{hacked_count}/{n} COMPROMISED')
         self.bounce_anim += 1
 
     def map_click(self, e):
@@ -1161,20 +1155,20 @@ class HackerApp:
         for s in g.servers:
             x, y = s['pos']
             if abs(e.x - x) < 25 and abs(e.y - y) < 25:
-                m = tk.Menu(self.root, tearoff=0, bg=Colors.dark, fg=Colors.cyan,
-                            activebackground='#1a3a6a', activeforeground=Colors.white)
-                m.add_command(label=f'🔍 SCAN {s["name"]}',
+                m = tk.Menu(self.root, tearoff=0, bg=Theme.BG_HEADER, fg=Theme.CYAN_MID,
+                            activebackground=Theme.BG_HEADER, activeforeground=Theme.TEXT)
+                m.add_command(label=f'SCAN {s["name"]}',
                               command=lambda h=s["name"]: self.exec_cmd(f'scan {h}'))
                 if s['scanned']:
                     if not s['decrypted']:
-                        m.add_command(label=f'🔓 DECRYPT {s["name"]}',
+                        m.add_command(label=f'DECRYPT {s["name"]}',
                                       command=lambda h=s["name"]: self.exec_cmd(f'decrypt {h}'))
                     for p in s['ports']:
                         if not s['cracked'].get(p):
-                            m.add_command(label=f'🔨 CRACK {s["name"]}:{p}',
+                            m.add_command(label=f'CRACK {s["name"]}:{p}',
                                           command=lambda h=s["name"], pp=p: self.exec_cmd(f'crack {h} {pp}'))
                 if g.hacked(s):
-                    m.add_command(label=f'🔗 BOUNCE {s["name"]}',
+                    m.add_command(label=f'BOUNCE {s["name"]}',
                                   command=lambda h=s["name"]: self.exec_cmd(f'bounce {h}'))
                     for p in s['ports']:
                         if s['cracked'].get(p) and s is not g.current_server:
@@ -1213,77 +1207,81 @@ class HackerApp:
     # ═══ REFRESH / RENDER ═══════════════════════════════════════════════════
 
     def refresh_all(self):
-        self.sys['money'].config(text=f'${g.money:,}')
         tr = g.trace_level
-        tc = '#00ff88' if tr < 50 else '#ffbb00' if tr < 80 else '#ff2244'
-        if tr > 70 and hasattr(self, '_trace_wobble') and self._trace_wobble:
-            off = random.randint(-1, 1)
-            self.sys['trace'].config(text=f'{tr:.1f}%', fg=tc, padx=10 + off, pady=2 + off)
-        else:
-            self.sys['trace'].config(text=f'{tr:.1f}%', fg=tc, padx=10, pady=2)
-        self._trace_wobble = tr > 70
-        self.sys['score'].config(text=str(g.score))
-        self.sys['level'].config(text=str(g.level))
-        self.sys['hacks'].config(text=str(g.hack_count))
-        self.sys['trace_cnt'].config(text=str(g.trace_count))
-        self.bounce_lbl.config(text=f'{len(g.bounce_chain)} hop ({g.trace_mult()}x)')
 
-        # Trace bar VU meter
-        self.trace_canvas.delete('all')
-        tw = self.trace_canvas.winfo_width() or 200
-        segments = 20
-        seg_w = max(4, tw // segments - 2)
-        fill_seg = int(segments * tr / 100)
-        for i in range(segments):
-            sx = i * (seg_w + 2)
-            sy = 0
-            c = '#00ff88' if i < segments * 0.5 else '#ffbb00' if i < segments * 0.8 else '#ff2244'
-            if i < fill_seg:
-                self.trace_canvas.create_rectangle(sx, sy, sx + seg_w, 12, fill=c, outline=Colors.dark, width=1, tags='tbar')
-            else:
-                self.trace_canvas.create_rectangle(sx, sy, sx + seg_w, 12, fill=Colors.darker, outline=Colors.dark, width=1, tags='tbar')
-        pulse = 0.5 + 0.5 * math.sin(time.time() * 8) if tr > 70 else 0
-        glow = int(255 * (0.3 + pulse * 0.7)) if tr > 70 else 80
-        self.trace_canvas.create_text(tw // 2, 6, text=f'TRACE {tr:.0f}%',
-                                      fill=f'#{glow:02x}{glow:02x}{glow:02x}', font=('Consolas', 9, 'bold'), tags='tbar')
+        # Stat cards
+        self._stat_cards['money'].update(f'${g.money:,}', Theme.GREEN if g.money > 0 else Theme.TEXT_DIM)
+        tr_color = Theme.GREEN if tr < 50 else Theme.AMBER if tr < 80 else Theme.RED
+        self._stat_cards['trace'].update(f'{tr:.0f}%', tr_color)
+        self._stat_cards['score'].update(str(g.score), Theme.CYAN)
+        self._stat_cards['level'].update(str(g.level), Theme.CYAN_MID)
 
+        # Quick stats
+        self._right_canvas.itemconfigure(self._quick_labels['hacks'],
+                                         text=str(g.hack_count))
+        self._right_canvas.itemconfigure(self._quick_labels['alerts'],
+                                         text=str(g.trace_count))
+
+        # Bounce
+        self._right_canvas.itemconfigure(self._bounce_label,
+                                         text=f'{len(g.bounce_chain)} hop ({g.trace_mult()}x)')
+
+        # Hardware
         for h in HARDWARE:
             lvl = g.hw_lvl(h[1])
-            clr = '#00ff88' if lvl >= h[5] else '#ffbb00' if lvl > 0 else Colors.dim
-            self.hw_lbls[h[1]].config(text=f'{lvl}/{h[5]}', fg=clr)
+            clr = Theme.GREEN if lvl >= h[5] else Theme.AMBER if lvl > 0 else Theme.TEXT_DIM
+            self._right_canvas.itemconfigure(self._hw_items[h[1]],
+                                             text=f'{lvl}/{h[5]}', fill=clr)
 
+        # Sentinel AI
+        sentinel_state = 'ACTIVE' if g.trace_level > 80 else 'ANALYZING' if g.trace_level > 50 else 'IDLE'
+        if hasattr(self, '_sentinel'):
+            self._sentinel.set_state(sentinel_state)
+
+        # Objectives
+        self._update_objectives()
+
+        # Console glow
         if hasattr(self, 'console'):
             parent = self.console.master
             if parent:
                 if g.current_server:
-                    parent.config(bg='#006633' if g.hacked(g.current_server) else '#005566')
+                    parent.config(bg=Theme.CYAN_DIM if g.hacked(g.current_server) else Theme.CYAN_ULTRADIM)
                 elif tr > 70:
-                    parent.config(bg=f'#{int(80 + 80 * math.sin(time.time() * 4)):02x}0000')
+                    pulse = int(40 + 40 * math.sin(time.time() * 4))
+                    parent.config(bg=f'#{pulse:02x}0000')
                 else:
-                    parent.config(bg='#004466')
-        self.render_msg()
-        self.render_news()
+                    parent.config(bg=Theme.BG_SURFACE)
+
+        # Status bar
+        self._status_labels['_trace_s'].config(
+            text=f'TRACE: {tr:.0f}%', fg=tr_color)
+        if g.current_server:
+            self._status_labels['_conn'].config(
+                text=f'CONN: {g.current_server["name"][:20]}', fg=Theme.GREEN)
+        else:
+            self._status_labels['_conn'].config(text='DISCONNECTED', fg=Theme.MAGENTA)
+
         self.trace_alarm()
         self.check_achievements()
         g.check_missions()
         self.glitch()
 
-    def render_msg(self):
-        self.msg.config(state=tk.NORMAL)
-        self.msg.delete('1.0', tk.END)
-        for m in g.log[:8]:
-            c = {'ok': '#00ff88', 'fail': '#ff2244', 'warn': '#ffbb00', 'info': '#4488ff'}.get(m[1], '#00ff88')
-            self.msg.insert(tk.END, m[0] + '\n')
-        self.msg.see(tk.END)
-        self.msg.config(state=tk.DISABLED)
-
-    def render_news(self):
-        self.msg.config(state=tk.NORMAL)
-        self.msg.delete('1.0', tk.END)
-        for n in g.news[:6]:
-            self.msg.insert(tk.END, n + '\n')
-        self.msg.see(tk.END)
-        self.msg.config(state=tk.DISABLED)
+    def _update_objectives(self):
+        hacked = sum(1 for s in g.servers if g.hacked(s))
+        mdone = sum(1 for m in g.missions if m['done'])
+        objs = [
+            f'▸ Servers: {hacked}/{len(g.servers)}',
+            f'▸ Missions: {mdone}/{len(g.missions) if g.missions else 0}',
+        ]
+        if g.current_server:
+            objs.append(f'▸ {g.current_server["name"][:20]}')
+        if g.trace_level > 50:
+            objs.append('▸ ⚠ KILL TRACE!')
+        objs += [''] * (4 - len(objs))
+        for i, t in enumerate(self._obj_items):
+            txt = objs[i] if i < len(objs) else ''
+            self._right_canvas.itemconfigure(t, text=txt)
 
     def show_objs(self):
         done = sum(1 for s in g.servers if g.hacked(s))
@@ -1365,7 +1363,7 @@ class HackerApp:
             w = c.winfo_width()
             for _ in range(random.randint(1, 3)):
                 y = random.randint(0, c.winfo_height() - 2)
-                c.create_line(0, y, w, y, fill=Colors.cyan, width=random.randint(1, 3), tags='glitch')
+                c.create_line(0, y, w, y, fill=Theme.CYAN_MID, width=random.randint(1, 3), tags='glitch')
                 self.root.after(100, lambda: c.delete('glitch'))
         elif eff == 'rain' and hasattr(self, 'console'):
             old_bg = self.console.cget('bg')
@@ -1378,13 +1376,13 @@ class HackerApp:
         w = tk.Toplevel(self.root)
         w.overrideredirect(True)
         w.attributes('-topmost', True)
-        w.configure(bg=Colors.black)
+        w.configure(bg=Theme.BG_HEADER)
         sw = self.root.winfo_screenwidth()
         sh = self.root.winfo_screenheight()
         x = sw - 420
         y = sh - 120
         w.geometry(f'400x50+{x}+{y}')
-        lbl = tk.Label(w, text=text, bg=Colors.black, fg=color,
+        lbl = tk.Label(w, text=text, bg=Theme.BG_HEADER, fg=color,
                        font=('Consolas', 10, 'bold'), wraplength=380)
         lbl.pack(expand=True, fill=tk.BOTH)
         self._beep(1000, 20)

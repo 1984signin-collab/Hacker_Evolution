@@ -16,15 +16,15 @@ from rich.style import Style
 
 # Match the game's custom color palette
 GAME_THEME = Theme({
-    'green':  '#00ff88',
-    'red':    '#ff2244',
-    'yellow': '#ffbb00',
-    'cyan':   '#00ddff',
-    'dim':    '#335577',
-    'white':  '#cceeff',
-    'pink':   '#ff0066',
-    'blue':   '#4488ff',
-    'orange': '#ff6600',
+    'green':  '#00cc88',
+    'red':    '#cc2244',
+    'yellow': '#ccaa00',
+    'cyan':   '#00cccc',
+    'dim':    '#7799aa',
+    'white':  '#ddeeff',
+    'pink':   '#cc44cc',
+    'blue':   '#008888',
+    'orange': '#ccaa00',
 })
 
 _console = Console(
@@ -134,10 +134,10 @@ def render_to_widget(widget: tk.Text, renderable, width=None):
 # ─── Helper factories ────────────────────────────────────────────────────────
 
 def make_table(title=None, headers=None, rows=None,
-               border_style='green', header_style='bold yellow',
+               border_style='cyan', header_style='bold green',
                **kwargs) -> Table:
     """Build a Rich Table with game-consistent styling."""
-    table = Table(title=title, title_style='bold yellow',
+    table = Table(title=title, title_style='bold cyan',
                   border_style=border_style, **kwargs)
     if headers:
         for h in headers:
@@ -149,7 +149,7 @@ def make_table(title=None, headers=None, rows=None,
 
 
 def make_panel(renderable, title=None,
-               border_style='green', **kwargs) -> Panel:
+               border_style='cyan', **kwargs) -> Panel:
     """Build a Rich Panel with game-consistent styling."""
     return Panel(renderable, title=title,
                  title_align='left',
