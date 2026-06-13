@@ -24,12 +24,12 @@ Your mission: breach Nexus's network, steal the truth, and make a final choice t
 
 | Feature | Description |
 |---|---|
-| **Hybrid Interface** | Cyberpunk terminal (Rich) + Visual Map (tkinter) |
+| **Canvas UI** | Full tkinter Canvas-drawn interface — console, stat cards, network map, boot screen, alert overlay. No images, no customtkinter |
 | **Network Simulation** | Servers, firewalls, ports, real-time connections |
 | **Hacking System** | Scan, crack, connect, download, upload, exec |
 | **Economy** | Earn credits by selling data, buy upgrades |
 | **Darknet Market** | Buy named exploits (SQL injector, brute-force tool, stealth kit, etc.) |
-| **Sentinel AI** | Adaptive adversary with DORMANT → ANALYZING → ACTIVE states |
+| **Sentinel AI** | Adaptive adversary with DORMANT → ANALYZING → ACTIVE states, animated panel |
 | **Dynamic World** | Random [SYSTEM]/[NET]/[SEC] events while you play |
 | **Dynamic Story** | Unfolds episodically via the STORY command |
 | **Hardware System** | RAM, CPU, personal firewall — upgrade your rig |
@@ -253,12 +253,20 @@ hacker-evolution/
 │       ├── trace_service.py    # Trace level management
 │       ├── mission_service.py  # Mission lifecycle
 │       └── sentinel_service.py # SentinelFSM wrapper
-├── ui/                         # User interface (tkinter + Rich)
-│   ├── app.py                  # Main window and event loop
+├── ui/                         # User interface (tkinter Canvas + Rich)
+│   ├── app.py                  # Main window, layout, event loop (~1300 lines)
 │   ├── commands.py             # Command implementations + CommandRegistry wiring
-│   ├── hud.py                  # Animated heads-up display
-│   ├── panels.py               # Side panels and map
-│   └── rich_bridge.py          # Rich → tkinter Text widget bridge
+│   ├── hud.py                  # Canvas-drawn animated HUD (vignette, scanlines, data rain)
+│   ├── panels.py               # Dialog panels (hardware upgrade, config, etc.)
+│   ├── theme.py                # Theme dataclass — palette, spacing, font helpers
+│   ├── fonts.py                # FontManager — JetBrains Mono / Consolas discovery
+│   ├── rich_bridge.py          # Rich → tkinter Text widget bridge
+│   └── widgets/                # Canvas-drawn widget components
+│       ├── boot_screen.py      # 6s animated Canvas boot (ASCII art, typing, glitch)
+│       ├── stat_card.py        # CanvasStatCard, CanvasSectionHeader
+│       ├── sentinel_panel.py   # Sentinel AI animated panel (pulse glow, threat bar)
+│       ├── network_map.py      # NetworkMapRenderer (radar grid, data packets, particles)
+│       └── alert_overlay.py    # Modal alert overlay (info/warning/error/success)
 ├── data/                       # 📁 CONTENT — edit these to mod the game
 │   ├── __init__.py             # Auto-loader + ContentValidator integration
 │   ├── schema/                 # Phase 5: JSON Schema files
@@ -361,9 +369,10 @@ Your mission, email, or exploit could be part of the official game!
 
 ## 🛠 Tech Stack
 
-- **Python** — Core language
-- **tkinter** — GUI window, map, animated HUD
-- **Rich** — Advanced terminal output (tables, panels, progress bars, colors)
+- **Python 3.10+** — Core language
+- **tkinter Canvas** — Full UI rendering (console, stat cards, network map, boot screen, alert overlay, HUD). Every pixel drawn with `create_*` — no images, no customtkinter
+- **Rich** — Terminal output formatting (tables, panels, colors) via Rich→tkinter bridge
+- **Theme engine** — Dataclass-based palette (16 colors, RGBA helpers) with dark teal/cyan primary and magenta alerts
 - **PIL/Pillow** — GIF capture (ancillary script only)
 - **Threading** — Async network operations
 

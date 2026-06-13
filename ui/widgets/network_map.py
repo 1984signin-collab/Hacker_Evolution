@@ -25,14 +25,21 @@ class NetworkMapRenderer:
         self._anim_frame = 0
         self._data_packets: list[dict] = []
         self._particles: list[dict] = []
+        self.canvas.bind('<Configure>', lambda e: self.draw())
 
     def set_callbacks(self, on_click=None, on_right_click=None):
         self.on_click = on_click
         self.on_right_click = on_right_click
 
     def draw(self):
-        w = self.canvas.winfo_width() or 600
-        h = self.canvas.winfo_height() or 160
+        w = self.canvas.winfo_width()
+        h = self.canvas.winfo_height()
+        if w <= 1 and h <= 1:
+            return
+        if w <= 1:
+            w = 600
+        if h <= 1:
+            h = 160
         n = len(g.servers)
         if n == 0:
             return

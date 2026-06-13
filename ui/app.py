@@ -89,6 +89,7 @@ class HackerApp:
         self.restart_requested = False
         self._boot_silent = True
         self._boot_state = 'BOOTING'
+        self.root.after(500, self.update_map)
         self.root.after(2000, self._animate_sentinel)
         self.start_ambient()
         # Boot window handles all intro narrative + login drama
@@ -617,8 +618,8 @@ class HackerApp:
             self._quick_labels[key] = v
 
         # ── Bounce ──
-        by = qy + 16
-        c.create_text(8, by, text='BOUNCE', fill=Theme.TEXT_DIM,
+        by = qy + 14
+        c.create_text(14, by, text='BOUNCE', fill=Theme.TEXT_DIM,
                       font=('Consolas', 8), anchor='w', tags='q')
         self._bounce_label = c.create_text(cw - 8, by, text='0 hop',
                                            fill=Theme.MAGENTA,
@@ -630,31 +631,31 @@ class HackerApp:
         self._sentinel = SentinelPanel(c, 4, sy, cw - 8)
 
         # ── Hardware section ──
-        hy = sy + SentinelPanel.HEIGHT + 8
+        hy = sy + SentinelPanel.HEIGHT + 4
         CanvasSectionHeader(c, 4, hy, 'HARDWARE', cw - 8, Theme.CYAN_MID)
         hy += 18
         self._hw_items = {}
         for i, h in enumerate(HARDWARE):
-            y = hy + i * 18
-            c.create_text(8, y, text=h[0][:14], fill=Theme.TEXT_DIM,
+            y = hy + i * 16
+            c.create_text(14, y, text=h[0][:14], fill=Theme.TEXT_DIM,
                           font=('Consolas', 8), anchor='w', tags='hw')
             v = c.create_text(cw - 8, y, text='-', fill=Theme.CYAN,
                               font=('Consolas', 8, 'bold'), anchor='e', tags='hw')
             self._hw_items[h[1]] = v
 
         # ── Objectives section ──
-        oy = hy + len(HARDWARE) * 18 + 4
+        oy = hy + len(HARDWARE) * 16 + 4
         CanvasSectionHeader(c, 4, oy, 'OBJECTIVES', cw - 8, Theme.CYAN_MID)
         oy += 18
         self._obj_items = []
-        for _ in range(4):
-            t = c.create_text(8, oy, text='', fill=Theme.TEXT_DIM,
+        for _ in range(3):
+            t = c.create_text(14, oy, text='', fill=Theme.TEXT_DIM,
                               font=('Consolas', 8), anchor='w', tags='obj')
-            oy += 16
+            oy += 14
             self._obj_items.append(t)
 
         # ── Action buttons ──
-        ay = oy + 6
+        ay = oy + 4
         self._action_btns = []
         btn_w = (cw - 20) // 3
         for i, (txt, cmd) in enumerate([
