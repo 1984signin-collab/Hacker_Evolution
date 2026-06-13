@@ -548,6 +548,19 @@ class HackerApp:
         self._input_glow()
         self.input.config(highlightthickness=0)
 
+        # Progress bar frame (used by background task runner in commands.py)
+        self.pf = tk.Frame(left, bg=Theme.BG_VOID)
+        self.pv = tk.DoubleVar()
+        self.pb = ttk.Progressbar(self.pf, variable=self.pv, length=300,
+                                  mode='determinate', style='cyan.Horizontal.TProgressbar')
+        self.pb.pack(pady=(5, 2))
+        self.ps = tk.Label(self.pf, text='', bg=Theme.BG_VOID, fg=Theme.CYAN,
+                           font=('Consolas', 10))
+        self.ps.pack(pady=(0, 2))
+        style = ttk.Style()
+        style.configure('cyan.Horizontal.TProgressbar', background=Theme.CYAN, troughcolor=Theme.BG_SURFACE)
+
+
         # ── Center: Network Map ──
         center = tk.Frame(body, bg=Theme.BG_VOID)
         center.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(4, 0))

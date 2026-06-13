@@ -1,0 +1,62 @@
+{
+  "money": 500,
+  "level": 1,
+  "score": 0,
+  "trace_level": 2.0,
+  "hack_count": 0,
+  "trace_count": 0,
+  "servers": [
+    {
+      "name": "243.143.35.99",
+      "ports": [
+        21,
+        99
+      ],
+      "key_bits": 256,
+      "files": [
+        {
+          "name": "targetlock_999.exploit",
+          "content": "# Exploit sat port 999"
+        }
+      ],
+      "money": 2000,
+      "desc": "Office computer",
+      "cracked": {},
+      "decrypted": false,
+      "scanned": false,
+      "bounce_used": 0,
+      "visited": false,
+      "pos": [
+        208.0,
+        140.4
+      ],
+      "is_gov": false,
+      "intel_stolen": false,
+      "links": [
+        {
+          "name": "secure.corp.net",
+          "ports": [
+            149
+          ],
+          "key_bits": 256,
+          "files": [
+            {
+              "name": "xvirus.bin",
+              "content": "# Virus - upload to target"
+            }
+          ],
+          "money": 1000,
+          "desc": "Secure server",
+          "cracked": {},
+          "decrypted": false,
+          "scanned": false,
+          "bounce_used": 0,
+          "visited": false,
+          "pos": [
+            122.41846726621593,
+            403.7928743809923
+          ],
+          "is_gov": false,
+          "intel_stolen": false,
+          "links": [
+            
