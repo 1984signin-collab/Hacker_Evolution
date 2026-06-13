@@ -19,6 +19,9 @@ from ui.theme import Theme
 from ui.rich_bridge import render_to_widget
 from ui.widgets.stat_card import CanvasStatCard, CanvasSectionHeader
 from ui.widgets.sentinel_panel import SentinelPanel
+from ui.widgets.network_map import NetworkMapRenderer
+from ui.widgets.boot_screen import BootScreen
+from ui.widgets.alert_overlay import AlertOverlay
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -74,6 +77,11 @@ class HackerApp:
 
         self.setup_title()
         self.setup_layout()
+        # Alert overlay canvas on top of everything
+        self._alert_canvas = tk.Canvas(self.main_frame, bg=Theme.BG_VOID, highlightthickness=0)
+        self._alert_canvas.place(relx=0, rely=0, relwidth=1, relheight=1)
+        self._alert_overlay = AlertOverlay(self._alert_canvas)
+        # Initially hidden — AlertOverlay.show() will raise it when needed
         self.setup_menu()
         self.setup_bindings()
         self.animate_particles()
@@ -221,52 +229,11 @@ class HackerApp:
     # ═══ FAKE BOOT LINUX ════════════════════════════════════════════════════
 
     def _fake_boot_desktop(self):
-        self._boot_win = tk.Toplevel(self.root)
-        w = self._boot_win
-        w.title('Boot')
-        sw = self.root.winfo_screenwidth()
-        sh = self.root.winfo_screenheight()
-        w.geometry(f'{sw}x{sh}+0+0')
-        w.overrideredirect(True)
-        w.configure(bg='#000000')
-        self._boot_state = 'BOOTING'
-        self._boot_hint_shown = False
-        # Tutorial boot lines — hints for the login below
-        boot_lines = [
-            ("[    0.000000] Linux version 6.8.0-kali1-amd64 (root@kali)", "#888"),
-            ("[    0.000000] Command line: BOOT_IMAGE=/vmlinuz root=/dev/sda1 ro quiet", "#888"),
-            ("[    0.250000] Initializing cgroup subsys cpuset", "#aaa"),
-            ("[    0.510000] CPU: Intel Core i9-13900K (24 core, 32 threads)", "#aaa"),
-            ("[    1.020000] PCI: Enabling device 0000:00:1f.2 (SATA controller)", "#aaa"),
-            ("[    1.350000] tty0: enabled on port 0x3f8 (IRQ 4)", "#aaa"),
-            ("[    1.680000] EXT4-fs (sda1): mounted filesystem with ordered data mode", "#0a0"),
-            ("[    2.010000] Loading kernel modules: iptable_filter, ip_tables", "#aaa"),
-            ("[    2.340000] NET: Registered protocol family 10 (IPv6)", "#aaa"),
-            ("[    2.670000] systemd[1]: Starting Network Manager...", "#aaa"),
-            ("[    3.000000] systemd[1]: Reached target Multi-User System", "#0a0"),
-            # ── Tutorial hints ──
-            ("[    3.200000] WARNING: Backup credentials in /tmp/recovery.txt", "#ff0"),
-            ("[    3.500000] NOTICE: /tmp/recovery.txt: valid recovery key", "#0a0"),
-            ("[    3.800000] SYS: Connection to Darius.OWC server interrupted (timeout)", "#888"),
-            ("[    4.100000] SEC: Last access: hacker — 14d ago — IP: <unknown>", "#888"),
-            ("[    4.400000] NET: Scanning... 2 hosts found: secure.corp, nexus.owc", "#888"),
-            ("[    4.700000] SYS: Log file: /var/log/auth.log — suspicious attempts", "#888"),
-            ("[    5.000000] systemd[1]: Starting getty on tty1...", "#aaa"),
-            ("", ""),
-            ("  ██╗  ██╗ █████╗  ██████╗██╗  ██╗███████╗██████╗ ", "#0f0"),
-            ("  ██║  ██║██╔══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗", "#0f0"),
-            ("  ███████║███████║██║     █████╔╝ █████╗  ██████╔╝", "#0f0"),
-            ("  ██╔══██║██╔══██║██║     ██╔═██╗ ██╔══╝  ██╔══██╗", "#0f0"),
-            ("  ██║  ██║██║  ██║╚██████╗██║  ██╗███████╗██║  ██║", "#0f0"),
-            ("  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝", "#0f0"),
-            ("", ""),
-            ("Kali GNU/Linux Rolling 2024.1 tty1", "#0f0"),
-        ]
-        self._boot_txt = tk.Text(w, bg='#000000', fg='#00ff88', font=('Consolas', 12),
-                                  relief=tk.FLAT, bd=0, insertbackground='#00ff88', insertwidth=6)
-        self._boot_txt.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
-        self._boot_txt.config(state=tk.NORMAL)
-        self._boot_animate(boot_lines, 0, lambda: self._boot_login_prompt())
+        # Canvas BootScreen — replaces 25s boot with 6s animation
+        def on_boot_done():
+            self._boot_state = 'DONE'
+            self._boot_transition_main()
+        BootScreen(self.root, on_boot_done)
 
     def _boot_animate(self, lines, i, callback=None):
         if i >= len(lines):
@@ -443,8 +410,6 @@ class HackerApp:
         self.root.after(2000, self._boot_transition_main)
 
     def _boot_transition_main(self):
-        if self._boot_win and self._boot_win.winfo_exists():
-            self._boot_win.destroy()
         self._boot_state = 'DONE'
         # Clean console and show transition
         self.console.config(state=tk.NORMAL)
@@ -514,8 +479,9 @@ class HackerApp:
         tk.Label(chdr, text='F1=Help  Tab=Complete', bg=Theme.BG_CANVAS,
                  fg=Theme.TEXT_DIM, font=('Consolas', 8)).pack(side=tk.RIGHT, padx=8)
 
-        # Console frame with glow border
-        glow_frame = tk.Frame(left, bg=Theme.BG_SURFACE, highlightthickness=0)
+        # Console frame with subtle border
+        glow_frame = tk.Frame(left, bg=Theme.BG_SURFACE, highlightthickness=1,
+                              highlightbackground=Theme.CYAN_ULTRADIM)
         glow_frame.pack(fill=tk.BOTH, expand=True, pady=1)
 
         self.console = tk.Text(glow_frame, bg=Theme.BG_VOID, fg=Theme.CYAN,
@@ -585,6 +551,7 @@ class HackerApp:
         self.map_canvas.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
         self.map_canvas.bind('<Button-1>', self.map_click)
         self.map_canvas.bind('<Button-3>', self.map_right_click)
+        self._map_renderer = NetworkMapRenderer(self.map_canvas)
 
         # ── Status bar ──
         self._status_bar = tk.Frame(self.main_frame, bg=Theme.BG_CANVAS, height=22)
@@ -932,6 +899,8 @@ class HackerApp:
     def _animate_sentinel(self):
         if hasattr(self, '_sentinel'):
             self._sentinel.animate()
+        if hasattr(self, '_alert_overlay'):
+            self._alert_overlay.animate()
         self.root.after(500, self._animate_sentinel)
 
     def _update_prompt(self):
@@ -944,199 +913,19 @@ class HackerApp:
 
     def _impact_wave(self, cx, cy):
         for r in range(5, 80, 5):
-            self.root.after(r * 5, lambda rr=r: self._draw_impact_ring(cx, cy, rr) if self.map_canvas.winfo_exists() else None)
-        self._particle_burst(cx, cy, Theme.CYAN, 30)
+            self.root.after(r * 5, lambda rr=r: (
+                self.map_canvas.create_oval(cx - rr, cy - rr, cx + rr, cy + rr,
+                                            outline=Theme.CYAN, width=2, tags='impact'),
+                self.root.after(120, lambda: self.map_canvas.delete('impact'))
+            ) if self.map_canvas.winfo_exists() else None)
+        self._map_renderer.emit_particles(cx, cy, Theme.CYAN, 30)
         self._screen_shake(200, 2)
-
-    def _draw_impact_ring(self, cx, cy, r):
-        self.map_canvas.create_oval(cx - r, cy - r, cx + r, cy + r, outline=Theme.CYAN, width=2, tags='impact')
-        self.root.after(120, lambda: self.map_canvas.delete('impact'))
-
-    # ═══ PARTICLE BURST ═════════════════════════════════════════════════════
-
-    def _particle_burst(self, cx, cy, color='#00ddff', count=25):
-        pts = [[random.uniform(-50, 50), random.uniform(-50, 50), random.uniform(1, 4)] for _ in range(count)]
-
-        def step(n=0):
-            if n >= 20:
-                return
-            for p in pts:
-                p[0] += p[2] * 1.5
-                p[1] += p[2] * 1.5
-                p[2] *= 0.9
-                if n > 0:
-                    self.map_canvas.create_oval(cx + p[0] - 2, cy + p[1] - 2,
-                                                cx + p[0] + 2, cy + p[1] + 2,
-                                                fill=color, outline='', tags='burst')
-            self.root.after(40, lambda: (self.map_canvas.delete('burst'), step(n + 1)))
-
-        step()
 
     # ═══ MAP ════════════════════════════════════════════════════════════════
 
     def update_map(self):
-        self.map_canvas.delete('all')
-        w = self.map_canvas.winfo_width() or 600
-        h = self.map_canvas.winfo_height() or 160
-        n = len(g.servers)
-        if n == 0:
-            return
-        cx, cy = w // 2, h // 2
-        radius = min(w, h) * 0.35
-
-        # Radar grid — ultra-dim teal
-        step_ = max(1, int(radius * 0.25))
-        for rng in range(step_, int(radius) + 1, step_):
-            self.map_canvas.create_oval(cx - rng, cy - rng, cx + rng, cy + rng,
-                                        outline=Theme.CYAN_ULTRADIM, width=1, tags='map')
-        for a in [0, math.pi / 4, math.pi / 2, 3 * math.pi / 4]:
-            dx = radius * math.cos(a)
-            dy = radius * math.sin(a)
-            self.map_canvas.create_line(cx - dx, cy - dy, cx + dx, cy + dy,
-                                        fill=Theme.CYAN_ULTRADIM, width=1, tags='map')
-        self.map_canvas.create_oval(cx - 3, cy - 3, cx + 3, cy + 3,
-                                    fill=Theme.CYAN_DIM, outline='', tags='map')
-
-        # Node positions
-        for i, s in enumerate(g.servers):
-            a = 2 * math.pi * i / n - math.pi / 2
-            x = cx + radius * math.cos(a)
-            y = cy + radius * math.sin(a)
-            s['pos'] = (x, y)
-
-        # Radar sweep
-        radar_angle = self.bounce_anim * 0.02
-        rx = cx + radius * math.cos(radar_angle)
-        ry = cy + radius * math.sin(radar_angle)
-        for ri in range(20, 0, -1):
-            alpha = 0.12 * (1 - ri / 20)
-            a2 = radar_angle - 0.03 * ri
-            rrx = cx + radius * 0.3 * math.cos(a2)
-            rry = cy + radius * 0.3 * math.sin(a2)
-            self.map_canvas.create_line(cx, cy, rrx, rry,
-                                        fill=Theme.rgba(Theme.CYAN, alpha),
-                                        width=ri // 4 + 1, tags='mapradar')
-        self.map_canvas.create_line(cx, cy, rx, ry, fill=Theme.CYAN, width=2, tags='mapradar')
-        self.root.after(500, lambda: self.map_canvas.delete('mapradar'))
-
-        # Connection lines — teal
-        now_t = time.time()
-        for i, s1 in enumerate(g.servers):
-            x1, y1 = s1['pos']
-            for j in range(i + 1, n):
-                x2, y2 = g.servers[j]['pos']
-                dx, dy = x2 - x1, y2 - y1
-                dist = math.hypot(dx, dy)
-                steps = max(1, int(dist / 8))
-                for s_ in range(steps):
-                    t1, t2 = s_ / steps, (s_ + 1) / steps
-                    bright = 0.1 + 0.15 * math.sin(t1 * math.pi)
-                    self.map_canvas.create_line(
-                        x1 + dx * t1, y1 + dy * t1, x1 + dx * t2, y1 + dy * t2,
-                        fill=f'#{int(15 * bright):02x}{int(40 * bright):02x}{int(40 * bright):02x}',
-                        width=1, tags='map')
-                if (i + j + int(now_t * 2)) % 3 == 0:
-                    tt = (now_t * 0.5 + (i * 7 + j * 13) * 0.01) % 1
-                    px, py = x1 + dx * tt, y1 + dy * tt
-                    sz = 1 + int(0.5 + 0.5 * math.sin(tt * math.pi))
-                    self.map_canvas.create_oval(px - sz, py - sz, px + sz, py + sz,
-                                                fill=Theme.CYAN, outline='', tags='map')
-
-        # Bounce lines
-        for bi in range(1, len(g.bounce_chain)):
-            h1 = g.bounce_chain[bi - 1]
-            h2 = g.bounce_chain[bi]
-            p1 = next((s for s in g.servers if s['name'] == h1), None)
-            p2 = next((s for s in g.servers if s['name'] == h2), None)
-            if p1 and p2:
-                x1, y1 = p1['pos']
-                x2, y2 = p2['pos']
-                col = Theme.CYAN
-                self.map_canvas.create_line(x1, y1, x2, y2, fill=Theme.CYAN_ULTRADIM, width=7, tags='map')
-                self.map_canvas.create_line(x1, y1, x2, y2, fill=col, width=3, tags='map')
-                t = (self.bounce_anim / 30) % 1
-                px, py = x1 + (x2 - x1) * t, y1 + (y2 - y1) * t
-                sz = 2 + int(1.5 * (0.5 + 0.5 * math.sin(self.bounce_anim / 5)))
-                self.map_canvas.create_oval(px - sz, py - sz, px + sz, py + sz,
-                                            fill=Theme.CYAN, outline=Theme.TEXT, width=1, tags='map')
-
-        # Nodes
-        now = time.time()
-        for s in g.servers:
-            x, y = s['pos']
-            is_hacked = g.hacked(s)
-            if is_hacked:
-                col, fill, icon = Theme.GREEN, Theme.CYAN_ULTRADIM, '✓'
-            elif s['decrypted']:
-                col, fill, icon = Theme.AMBER, Theme.BG_CANVAS, '◉'
-            elif s['scanned']:
-                col, fill, icon = Theme.AMBER, Theme.BG_CANVAS, '◌'
-            else:
-                col, fill, icon = Theme.CYAN_DIM, Theme.BG_VOID, '○'
-            in_bounce = s['name'] in g.bounce_chain
-            is_connected = s is g.current_server
-            r = 9 if not in_bounce else 13
-            glow_r = 18 if in_bounce else 14
-            if is_connected:
-                r, glow_r = 15, 22
-
-            # Glow layers
-            for layer in range(3, 0, -1):
-                lr = glow_r * layer / 3
-                frac = layer / 3
-                lc = Theme.alpha(col, frac * 0.5)
-                self.map_canvas.create_oval(x - lr, y - lr, x + lr, y + lr,
-                                            outline='', fill=lc, tags='map')
-            # Hacked pulse
-            if is_hacked:
-                p = 0.5 + 0.5 * math.sin(now * 3)
-                pr = glow_r + 4 + int(p * 6)
-                pc = Theme.rgba(Theme.GREEN, 0.3 + 0.7 * p)
-                self.map_canvas.create_oval(x - pr, y - pr, x + pr, y + pr,
-                                            outline=pc, width=2, tags='map')
-            # Connected ring
-            if is_connected:
-                cr = glow_r + 8
-                self.map_canvas.create_oval(x - cr, y - cr, x + cr, y + cr,
-                                            outline=Theme.CYAN, width=1, dash=(3, 3), tags='map')
-            # Node body
-            self.map_canvas.create_oval(x - r, y - r, x + r, y + r,
-                                        outline=col, fill=fill, width=2, tags='map')
-            if is_hacked or s['decrypted']:
-                hi = r * 0.4
-                self.map_canvas.create_oval(x - hi, y - hi, x + hi, y + hi,
-                                            outline='', fill=Theme.GREEN if is_hacked else Theme.AMBER, tags='map')
-            # Icon — no emoji
-            desc_lower = s['desc'].lower()
-            if 'bank' in desc_lower or 'atm' in desc_lower:
-                icon = '$'
-            elif 'military' in desc_lower or 'satellite' in desc_lower:
-                icon = '!'
-            elif 'gsm' in desc_lower or 'tower' in desc_lower:
-                icon = '~'
-            elif 'corporate' in desc_lower or 'mainframe' in desc_lower:
-                icon = '#'
-            elif 'office' in desc_lower:
-                icon = '@'
-            elif s.get('is_gov'):
-                icon = 'G'
-
-            # Labels
-            self.map_canvas.create_text(x, y - r - 10, text=s['name'][:28],
-                                        fill=col, font=('Consolas', 8, 'bold'), anchor='s', tags='map')
-            self.map_canvas.create_text(x, y - r - 24, text=icon,
-                                        fill=col, font=('Consolas', 9), anchor='s', tags='map')
-            if s['scanned']:
-                self.map_canvas.create_text(x, y + r + 5, text='/'.join(str(p) for p in s['ports']),
-                                            fill=Theme.CYAN_DIM, font=('Consolas', 7), anchor='n', tags='map')
-            if is_connected:
-                self.map_canvas.create_text(x, y + r + 16, text='← CONNECTED',
-                                            fill=Theme.GREEN, font=('Consolas', 7, 'bold'), anchor='n', tags='map')
-
-        # Map status
-        hacked_count = sum(1 for s in g.servers if g.hacked(s))
-        self._map_status.config(text=f'{hacked_count}/{n} COMPROMISED')
-        self.bounce_anim += 1
+        self._map_renderer.draw()
+        self.bounce_anim = self._map_renderer._anim_frame
 
     def map_click(self, e):
         for s in g.servers:
@@ -1360,9 +1149,12 @@ class HackerApp:
             self.root.after(80, lambda: self.main_frame.place_configure(relx=0, rely=0))
         elif eff == 'scanline' and hasattr(self, 'hud'):
             c = self.hud.canvas
+            h = c.winfo_height()
             w = c.winfo_width()
+            if h < 3 or w < 3:
+                return
             for _ in range(random.randint(1, 3)):
-                y = random.randint(0, c.winfo_height() - 2)
+                y = random.randint(0, h - 2)
                 c.create_line(0, y, w, y, fill=Theme.CYAN_MID, width=random.randint(1, 3), tags='glitch')
                 self.root.after(100, lambda: c.delete('glitch'))
         elif eff == 'rain' and hasattr(self, 'console'):
