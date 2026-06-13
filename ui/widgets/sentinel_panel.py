@@ -18,7 +18,7 @@ class SentinelPanel:
         ACTIVE    — red, aggressive pulse + corner flash
     """
 
-    HEIGHT = 100
+    HEIGHT = 84
 
     def __init__(self, canvas: tk.Canvas, x: int, y: int, width: int = 300):
         self.canvas = canvas

@@ -14,10 +14,10 @@ import winsound
 
 from engine.config import SAVE_FILE, AUTO_FILE
 from engine.game import g
-from data import HARDWARE, STORY_MISSIONS, DARIUS_EMAILS
+from data import STORY_MISSIONS, DARIUS_EMAILS
 from ui.theme import Theme
 from ui.rich_bridge import render_to_widget
-from ui.widgets.stat_card import CanvasStatCard, CanvasSectionHeader
+from ui.widgets.stat_card import CanvasSectionHeader
 from ui.widgets.sentinel_panel import SentinelPanel
 from ui.widgets.network_map import NetworkMapRenderer
 from ui.widgets.boot_screen import BootScreen
@@ -432,23 +432,44 @@ class HackerApp:
         self._title_canvas.pack(fill=tk.X)
         self._draw_title(self._title_canvas)
 
+    def _nav_click(self, item):
+        if item == 'START':
+            if hasattr(self, 'h_newgame_wrapper'):
+                self.h_newgame_wrapper()
+        elif item == 'LOAD':
+            self.load()
+        elif item == 'DATA LOG':
+            self.exec_cmd('email')
+        elif item == 'OPTIONS':
+            if hasattr(self, 'show_config'):
+                self.show_config()
+        elif item == 'QUIT':
+            self.on_close()
+
     def _draw_title(self, c):
         c.delete('all')
         w = c.winfo_width()
-        if w < 100:
+        if w < 200:
             c.after(50, lambda: self._draw_title(c))
             return
-        # ASCII art header
-        art = [
-            "╔══ HACKER EVOLUTION  ══╗",
-            "║  404 FUN NOT FOUND    ║",
-            "╚═══════════════════════╝",
-        ]
-        y = 4
-        for line in art:
-            c.create_text(w // 2, y, text=line, fill=Theme.CYAN,
-                          font=('Consolas', 12, 'bold'), tags='title')
-            y += 16
+        # Title left
+        c.create_text(14, 18, text='HACKER EVOLUTION',
+                      fill=Theme.CYAN, font=('Consolas', 18, 'bold'), anchor='w')
+        c.create_text(14, 38, text='COVERT NETWORK INTRUSION SYSTEM',
+                      fill=Theme.CYAN_MID, font=('Consolas', 8), anchor='w')
+        # Navigation right
+        nav_items = ['START', 'LOAD', 'DATA LOG', 'OPTIONS', 'QUIT']
+        nav_x = w - 14
+        nav_y = 20
+        for item in reversed(nav_items):
+            tw = len(item) * 9 + 20
+            tid = c.create_text(nav_x, nav_y, text=item,
+                                fill=Theme.CYAN_MID, font=('Consolas', 10, 'bold'),
+                                anchor='e', tags='nav')
+            c.tag_bind(tid, '<Button-1>', lambda e, i=item: self._nav_click(i))
+            c.tag_bind(tid, '<Enter>', lambda e, t=tid: c.itemconfigure(t, fill=Theme.CYAN))
+            c.tag_bind(tid, '<Leave>', lambda e, t=tid: c.itemconfigure(t, fill=Theme.CYAN_MID))
+            nav_x -= tw
         # Glow bar
         for i in range(w):
             b = 0.25 + 0.75 * math.sin(i / 12 - math.pi / 2)
@@ -456,7 +477,7 @@ class HackerApp:
             r = int(3 * b)
             gv = int(30 + 60 * b)
             bl = int(60 + 120 * b)
-            c.create_line(i, 50, i, 52, fill=f'#{r:02x}{gv:02x}{bl:02x}', tags='title')
+            c.create_line(i, 49, i, 52, fill=f'#{r:02x}{gv:02x}{bl:02x}', tags='title')
         c.lower('title')
 
     # ═══ LAYOUT ═════════════════════════════════════════════════════════════
@@ -465,30 +486,30 @@ class HackerApp:
         self.root.update_idletasks()
         avail = max(900, self.root.winfo_width())
 
-        # ── Main horizontal split ──
+        # ── Main body (3 columns) ──
         body = tk.Frame(self.main_frame, bg=Theme.BG_VOID)
-        body.pack(fill=tk.BOTH, expand=True, padx=4, pady=2)
+        body.pack(fill=tk.BOTH, expand=True, padx=4, pady=(1, 1))
 
-        # Console column (left ~65%)
+        # ── Left: Terminal Console ──
         left = tk.Frame(body, bg=Theme.BG_VOID)
-        left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        left.pack(side=tk.LEFT, fill=tk.BOTH)
 
-        # Console header
+        # Terminal header
         chdr = tk.Frame(left, bg=Theme.BG_CANVAS)
         chdr.pack(fill=tk.X)
-        tk.Label(chdr, text='[ CONSOLE ]', bg=Theme.BG_CANVAS, fg=Theme.CYAN,
+        tk.Label(chdr, text='[ TERMINAL:0 ]', bg=Theme.BG_CANVAS, fg=Theme.CYAN,
                  font=('Consolas', 9, 'bold')).pack(side=tk.LEFT, padx=8, pady=3)
         tk.Label(chdr, text='F1=Help  Tab=Complete', bg=Theme.BG_CANVAS,
                  fg=Theme.TEXT_DIM, font=('Consolas', 8)).pack(side=tk.RIGHT, padx=8)
 
-        # Console frame with subtle border
+        # Terminal border (thin glow)
         glow_frame = tk.Frame(left, bg=Theme.BG_SURFACE, highlightthickness=1,
                               highlightbackground=Theme.CYAN_ULTRADIM)
         glow_frame.pack(fill=tk.BOTH, expand=True, pady=1)
 
         self.console = tk.Text(glow_frame, bg=Theme.BG_VOID, fg=Theme.CYAN,
                                font=('Consolas', 11), relief=tk.FLAT, padx=8, pady=5,
-                               height=18, wrap=tk.WORD, state=tk.DISABLED, borderwidth=0,
+                               wrap=tk.WORD, state=tk.DISABLED, borderwidth=0,
                                insertbackground=Theme.CYAN, insertwidth=7,
                                insertofftime=300, insertontime=600)
         self.console.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
@@ -527,8 +548,29 @@ class HackerApp:
         self._input_glow()
         self.input.config(highlightthickness=0)
 
-        # ── Right panel (Canvas-drawn HUD) ──
-        right_w = min(360, int(avail * 0.33))
+        # ── Center: Network Map ──
+        center = tk.Frame(body, bg=Theme.BG_VOID)
+        center.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(4, 0))
+
+        # Map header
+        map_hdr = tk.Frame(center, bg=Theme.BG_CANVAS)
+        map_hdr.pack(fill=tk.X)
+        tk.Label(map_hdr, text='[ NETWORK MAP: KYBERNETIX MAIN_GRID ]',
+                 bg=Theme.BG_CANVAS, fg=Theme.CYAN,
+                 font=('Consolas', 9, 'bold')).pack(side=tk.LEFT, padx=8, pady=3)
+        self._map_status = tk.Label(map_hdr, text='', bg=Theme.BG_CANVAS,
+                                    fg=Theme.TEXT_DIM, font=('Consolas', 8))
+        self._map_status.pack(side=tk.RIGHT, padx=8)
+
+        self.map_canvas = tk.Canvas(center, bg=Theme.BG_VOID,
+                                    highlightthickness=0)
+        self.map_canvas.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
+        self.map_canvas.bind('<Button-1>', self.map_click)
+        self.map_canvas.bind('<Button-3>', self.map_right_click)
+        self._map_renderer = NetworkMapRenderer(self.map_canvas)
+
+        # ── Right: HUD Stack Canvas ──
+        right_w = min(300, int(avail * 0.22))
         right_frame = tk.Frame(body, bg=Theme.BG_VOID, width=right_w)
         right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=(4, 0))
         right_frame.pack_propagate(False)
@@ -537,38 +579,40 @@ class HackerApp:
                                        highlightthickness=0, width=right_w)
         self._right_canvas.pack(fill=tk.BOTH, expand=True)
 
-        # ── Map area (bottom, full width) ──
-        map_frame = tk.Frame(self.main_frame, bg=Theme.BG_VOID, height=195)
-        map_frame.pack(fill=tk.X, pady=(1, 0))
-        # Map header
-        map_hdr = tk.Frame(map_frame, bg=Theme.BG_CANVAS)
-        map_hdr.pack(fill=tk.X)
-        tk.Label(map_hdr, text='[ NETWORK TOPOLOGY ]', bg=Theme.BG_CANVAS,
-                 fg=Theme.CYAN, font=('Consolas', 9, 'bold')).pack(side=tk.LEFT, padx=8, pady=2)
-        self._map_status = tk.Label(map_hdr, text='', bg=Theme.BG_CANVAS,
-                                    fg=Theme.TEXT_DIM, font=('Consolas', 8))
-        self._map_status.pack(side=tk.RIGHT, padx=8)
-        self.map_canvas = tk.Canvas(map_frame, bg=Theme.BG_VOID,
-                                    highlightthickness=0, height=160)
-        self.map_canvas.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
-        self.map_canvas.bind('<Button-1>', self.map_click)
-        self.map_canvas.bind('<Button-3>', self.map_right_click)
-        self._map_renderer = NetworkMapRenderer(self.map_canvas)
-
         # ── Status bar ──
-        self._status_bar = tk.Frame(self.main_frame, bg=Theme.BG_CANVAS, height=22)
-        self._status_bar.pack(fill=tk.X)
+        self._status_bar = tk.Frame(self.main_frame, bg=Theme.BG_CANVAS, height=24)
+        self._status_bar.pack(fill=tk.X, pady=(1, 0))
         self._status_labels = {}
-        for side, items in [
-            (tk.LEFT, [('_ip', 'IP: --', Theme.TEXT_DIM)]),
-            (tk.RIGHT, [('_conn', 'DISCONNECTED', Theme.MAGENTA),
-                        ('_trace_s', 'TRACE: 0%', Theme.GREEN)]),
-        ]:
-            for key, txt, col in items:
-                lb = tk.Label(self._status_bar, text=txt, bg=Theme.BG_CANVAS,
-                              fg=col, font=('Consolas', 8))
-                lb.pack(side=side, padx=8)
-                self._status_labels[key] = lb
+        self._status_indicators = {}
+        # Left: indicators
+        indicators = [
+            ('_money', 'CREDITS', '$0', Theme.GREEN),
+            ('_ram', 'RAM', '--%', Theme.CYAN),
+            ('_cpu', 'CPU', '--%', Theme.CYAN_MID),
+            ('_fw', 'FW', '--', Theme.CYAN),
+            ('_tools', 'TOOLS', '--', Theme.AMBER),
+            ('_crypto', 'CRYPTO', '--', Theme.MAGENTA),
+        ]
+        for key, label, val, col in indicators:
+            f = tk.Frame(self._status_bar, bg=Theme.BG_CANVAS)
+            f.pack(side=tk.LEFT, padx=(4, 0))
+            tk.Label(f, text=label, bg=Theme.BG_CANVAS, fg=Theme.TEXT_DIM,
+                     font=('Consolas', 7)).pack(side=tk.LEFT)
+            lb = tk.Label(f, text=val, bg=Theme.BG_CANVAS, fg=col,
+                          font=('Consolas', 8, 'bold'))
+            lb.pack(side=tk.LEFT, padx=(2, 0))
+            self._status_indicators[key] = lb
+        # Right: connection + trace
+        conn_frame = tk.Frame(self._status_bar, bg=Theme.BG_CANVAS)
+        conn_frame.pack(side=tk.RIGHT, padx=8)
+        self._status_labels['_conn'] = tk.Label(
+            conn_frame, text='DISCONNECTED', bg=Theme.BG_CANVAS, fg=Theme.MAGENTA,
+            font=('Consolas', 8))
+        self._status_labels['_conn'].pack(side=tk.LEFT, padx=(0, 8))
+        self._status_labels['_trace_s'] = tk.Label(
+            conn_frame, text='TRACE: 0%', bg=Theme.BG_CANVAS, fg=Theme.GREEN,
+            font=('Consolas', 8, 'bold'))
+        self._status_labels['_trace_s'].pack(side=tk.LEFT)
 
         # ── Draw right panel contents ──
         self._build_right_panel()
@@ -577,94 +621,120 @@ class HackerApp:
         c = self._right_canvas
         cw = int(c.cget('width'))
 
-        # Base background with grid dots
+        # Background grid dots
         for x in range(0, cw, 20):
             for y in range(0, 1200, 20):
                 if (x + y) % 40 == 0:
                     c.create_oval(x - 1, y - 1, x + 2, y + 2,
                                   fill=Theme.CYAN_ULTRADIM, outline='', tags='bg')
 
-        # ── Stat cards (2x2 grid) ──
-        card_w = (cw - 16) // 2
-        card_h = 60
-        x0 = 4
-        y0 = 4
-        self._stat_cards = {}
-        stats = [
-            ('money',   'MONEY',    Theme.GREEN),
-            ('score',   'SCORE',    Theme.CYAN),
-            ('trace',   'TRACE',    Theme.RED),
-            ('level',   'LEVEL',    Theme.CYAN_MID),
+        y = 4
+
+        # ════════════════════════════════════════════════════════════════
+        # 1. SYSTEM STATUS
+        # ════════════════════════════════════════════════════════════════
+        CanvasSectionHeader(c, 4, y, 'SYSTEM STATUS', cw - 8, Theme.CYAN_MID)
+        y += 18
+        self._status_word = c.create_text(14, y, text='SECURE',
+                                          fill=Theme.GREEN,
+                                          font=('Consolas', 11, 'bold'), anchor='w')
+        y += 16
+        # Progress bar
+        bar_x, bar_y = 14, y
+        bar_w = cw - 28
+        bar_h = 10
+        self._status_bar_rect = (bar_x, bar_y, bar_w, bar_h)
+        c.create_rectangle(bar_x, bar_y, bar_x + bar_w, bar_y + bar_h,
+                           fill=Theme.BG_VOID, outline=Theme.CYAN_ULTRADIM, width=1)
+        self._status_bar_fill = c.create_rectangle(
+            bar_x + 1, bar_y + 1, bar_x + 1, bar_y + bar_h - 1,
+            fill=Theme.GREEN, outline='')
+        self._status_pct = c.create_text(
+            bar_x + bar_w - 2, bar_y + bar_h // 2,
+            text='82%', fill=Theme.GREEN, font=('Consolas', 7, 'bold'), anchor='e')
+        y += bar_h + 6
+        self._status_info = c.create_text(
+            14, y, text='Level 3 Bypass | Mask Active',
+            fill=Theme.TEXT_DIM, font=('Consolas', 7), anchor='w')
+        y += 16
+
+        # ════════════════════════════════════════════════════════════════
+        # 2. SCANNER
+        # ════════════════════════════════════════════════════════════════
+        CanvasSectionHeader(c, 4, y, 'SCANNER', cw - 8, Theme.CYAN_MID)
+        y += 18
+        self._scan_phase = 0.0
+        self._scan_wave_items = []
+        wave_center_y = y + 18
+        n_wave = int(cw * 0.35)
+        for i in range(n_wave):
+            px = 8 + i * 2
+            li = c.create_line(px, wave_center_y, px + 2, wave_center_y,
+                               fill=Theme.CYAN_ULTRADIM, width=1, tags='scan')
+            self._scan_wave_items.append(li)
+        # Sweep bar
+        self._scan_sweep = c.create_line(
+            8, wave_center_y - 16, 8, wave_center_y + 16,
+            fill=Theme.CYAN, width=2, tags='scan')
+        y += 38
+        c.create_text(14, y, text='Scanning Grid D1', fill=Theme.TEXT_DIM,
+                      font=('Consolas', 8), anchor='w')
+        self._scan_noise = c.create_text(cw - 8, y, text='Noise 12%', fill=Theme.CYAN,
+                                         font=('Consolas', 8), anchor='e')
+        y += 18
+
+        # ════════════════════════════════════════════════════════════════
+        # 3. ALERTS
+        # ════════════════════════════════════════════════════════════════
+        CanvasSectionHeader(c, 4, y, 'ALERTS', cw - 8, Theme.AMBER)
+        y += 18
+        self._alert_items = {}
+        alerts_data = [
+            ('trace',  'TRACE',     '0.0%',   Theme.RED),
+            ('sentinel', 'SENTINEL', 'DORMANT', Theme.GREEN),
+            ('probe',  'PROBE',     'NONE',    Theme.TEXT_DIM),
+            ('counter', 'COUNTER',  '--',      Theme.AMBER),
         ]
-        for i, (key, label, color) in enumerate(stats):
-            col = i % 2
-            row = i // 2
-            x = x0 + col * (card_w + 6)
-            y = y0 + row * (card_h + 6)
-            card = CanvasStatCard(c, x, y, label, '-', color, card_w, card_h)
-            self._stat_cards[key] = card
+        for key, label, val, col in alerts_data:
+            c.create_text(14, y, text=f'{label}', fill=col,
+                          font=('Consolas', 8, 'bold'), anchor='w')
+            v = c.create_text(cw - 8, y, text=val, fill=col,
+                              font=('Consolas', 8, 'bold'), anchor='e')
+            self._alert_items[key] = v
+            y += 14
+        y += 2
 
-        # ── Quick stats row ──
-        qy = y0 + 2 * (card_h + 6) + 4
-        CanvasSectionHeader(c, 4, qy, 'STATUS', cw - 8, Theme.CYAN_MID)
-        qy += 18
-        self._quick_labels = {}
-        for i, (key, label) in enumerate([('hacks', 'HACKS'), ('alerts', 'ALERTS')]):
-            x = 8 + i * ((cw - 16) // 2 + 4)
-            c.create_text(x, qy, text=label, fill=Theme.TEXT_DIM,
-                          font=('Consolas', 8), anchor='w', tags='q')
-            v = c.create_text(x + 80, qy, text='-', fill=Theme.GREEN if i == 0 else Theme.AMBER,
-                              font=('Consolas', 9, 'bold'), anchor='e', tags='q')
-            self._quick_labels[key] = v
-
-        # ── Bounce ──
-        by = qy + 14
-        c.create_text(14, by, text='BOUNCE', fill=Theme.TEXT_DIM,
-                      font=('Consolas', 8), anchor='w', tags='q')
-        self._bounce_label = c.create_text(cw - 8, by, text='0 hop',
-                                           fill=Theme.MAGENTA,
-                                           font=('Consolas', 9, 'bold'),
-                                           anchor='e', tags='q')
-
-        # ── Sentinel AI ──
-        sy = by + 20
-        self._sentinel = SentinelPanel(c, 4, sy, cw - 8)
-
-        # ── Hardware section ──
-        hy = sy + SentinelPanel.HEIGHT + 4
-        CanvasSectionHeader(c, 4, hy, 'HARDWARE', cw - 8, Theme.CYAN_MID)
-        hy += 18
-        self._hw_items = {}
-        for i, h in enumerate(HARDWARE):
-            y = hy + i * 16
-            c.create_text(14, y, text=h[0][:14], fill=Theme.TEXT_DIM,
-                          font=('Consolas', 8), anchor='w', tags='hw')
-            v = c.create_text(cw - 8, y, text='-', fill=Theme.CYAN,
-                              font=('Consolas', 8, 'bold'), anchor='e', tags='hw')
-            self._hw_items[h[1]] = v
-
-        # ── Objectives section ──
-        oy = hy + len(HARDWARE) * 16 + 4
-        CanvasSectionHeader(c, 4, oy, 'OBJECTIVES', cw - 8, Theme.CYAN_MID)
-        oy += 18
+        # ════════════════════════════════════════════════════════════════
+        # 4. OBJECTIVES
+        # ════════════════════════════════════════════════════════════════
+        CanvasSectionHeader(c, 4, y, 'OBJECTIVES', cw - 8, Theme.CYAN_MID)
+        y += 18
         self._obj_items = []
-        for _ in range(3):
-            t = c.create_text(14, oy, text='', fill=Theme.TEXT_DIM,
+        for _ in range(4):
+            t = c.create_text(14, y, text='', fill=Theme.TEXT_DIM,
                               font=('Consolas', 8), anchor='w', tags='obj')
-            oy += 14
+            y += 13
             self._obj_items.append(t)
+        y += 4
 
-        # ── Action buttons ──
-        ay = oy + 4
+        # ════════════════════════════════════════════════════════════════
+        # 5. SENTINEL AI
+        # ════════════════════════════════════════════════════════════════
+        self._sentinel = SentinelPanel(c, 4, y, cw - 8)
+        y += SentinelPanel.HEIGHT + 6
+
+        # ════════════════════════════════════════════════════════════════
+        # 6. Action buttons
+        # ════════════════════════════════════════════════════════════════
+        ay = y + 2
         self._action_btns = []
         btn_w = (cw - 20) // 3
         for i, (txt, cmd) in enumerate([
             ('SAVE', self.save), ('LOAD', self.load), ('UPGRADE', self.show_upgrade),
         ]):
             x = 4 + i * (btn_w + 4)
-            self._draw_button(x, ay, btn_w, 24, txt, cmd)
+            self._draw_button(x, ay, btn_w, 22, txt, cmd)
 
-        # Full panel bg
         c.lower('bg')
 
     def _draw_button(self, x, y, w, h, text, command):
@@ -898,11 +968,54 @@ class HackerApp:
 
         tick()
 
+    def _animate_scanner(self):
+        if not hasattr(self, '_scan_wave_items') or not self._scan_wave_items:
+            return
+        c = self._right_canvas
+        if not c.winfo_exists():
+            return
+        w = int(c.cget('width'))
+        n = len(self._scan_wave_items)
+        if n < 2:
+            return
+        self._scan_phase = (self._scan_phase + 0.15) % (2 * math.pi)
+        wave_center_y = None
+        for i, li in enumerate(self._scan_wave_items):
+            try:
+                bbox = c.bbox(li)
+                if bbox:
+                    wave_center_y = bbox[1] + (bbox[3] - bbox[1]) / 2
+                    break
+            except Exception:
+                pass
+        if wave_center_y is None:
+            return
+        for i, li in enumerate(self._scan_wave_items):
+            px = 8 + i * 2
+            amp = 8 + 4 * math.sin(i * 0.3)
+            wave_y = wave_center_y + amp * math.sin(i * 0.25 + self._scan_phase)
+            c.coords(li, px, wave_y, px + 2, wave_y)
+            bright = 0.2 + 0.8 * (0.5 + 0.5 * math.sin(i * 0.2 + self._scan_phase))
+            col = Theme.rgba(Theme.CYAN, bright)
+            c.itemconfigure(li, fill=col)
+        # Sweep line
+        sweep_pos = 8 + (self._scan_phase / (2 * math.pi)) * (n * 2)
+        if hasattr(self, '_scan_sweep'):
+            try:
+                bbox2 = c.bbox(self._scan_sweep)
+                if bbox2:
+                    sy = bbox2[1]
+                    sh = bbox2[3] - bbox2[1]
+                    c.coords(self._scan_sweep, sweep_pos, sy, sweep_pos, sy + sh)
+            except Exception:
+                pass
+
     def _animate_sentinel(self):
         if hasattr(self, '_sentinel'):
             self._sentinel.animate()
         if hasattr(self, '_alert_overlay'):
             self._alert_overlay.animate()
+        self._animate_scanner()
         self.root.after(500, self._animate_sentinel)
 
     def _update_prompt(self):
@@ -998,39 +1111,89 @@ class HackerApp:
     # ═══ REFRESH / RENDER ═══════════════════════════════════════════════════
 
     def refresh_all(self):
+        c = self._right_canvas
         tr = g.trace_level
-
-        # Stat cards
-        self._stat_cards['money'].update(f'${g.money:,}', Theme.GREEN if g.money > 0 else Theme.TEXT_DIM)
         tr_color = Theme.GREEN if tr < 50 else Theme.AMBER if tr < 80 else Theme.RED
-        self._stat_cards['trace'].update(f'{tr:.0f}%', tr_color)
-        self._stat_cards['score'].update(str(g.score), Theme.CYAN)
-        self._stat_cards['level'].update(str(g.level), Theme.CYAN_MID)
 
-        # Quick stats
-        self._right_canvas.itemconfigure(self._quick_labels['hacks'],
-                                         text=str(g.hack_count))
-        self._right_canvas.itemconfigure(self._quick_labels['alerts'],
-                                         text=str(g.trace_count))
+        # ── SYSTEM STATUS ──
+        if hasattr(self, '_status_word'):
+            status = 'SECURE' if tr < 40 else 'STABLE' if tr < 70 else 'ALERT'
+            c.itemconfigure(self._status_word, text=status,
+                            fill=Theme.GREEN if tr < 50 else Theme.AMBER if tr < 80 else Theme.RED)
+        if hasattr(self, '_status_bar_fill') and hasattr(self, '_status_bar_rect'):
+            bx, by, bw, bh = self._status_bar_rect
+            target_w = int((1 - tr / 100) * (bw - 2))
+            target_w = max(0, min(bw - 2, target_w))
+            c.coords(self._status_bar_fill, bx + 1, by + 1, bx + 1 + target_w, by + bh - 1)
+            c.itemconfigure(self._status_bar_fill,
+                            fill=Theme.GREEN if tr < 50 else Theme.AMBER if tr < 80 else Theme.RED)
+        if hasattr(self, '_status_pct'):
+            pct = 100 - tr
+            c.itemconfigure(self._status_pct, text=f'{pct:.0f}%')
+        if hasattr(self, '_status_info'):
+            bypass = min(g.level, 10)
+            info_parts = [f'Level {bypass} Bypass']
+            if tr > 30:
+                info_parts.append(f'Trace {tr:.0f}%')
+            if g.current_server:
+                info_parts.append(g.current_server['name'].split('.')[0])
+            c.itemconfigure(self._status_info, text=' | '.join(info_parts))
 
-        # Bounce
-        self._right_canvas.itemconfigure(self._bounce_label,
-                                         text=f'{len(g.bounce_chain)} hop ({g.trace_mult()}x)')
+        # ── SCANNER ── (animated wave phase updated in _animate_scanner)
 
-        # Hardware
-        for h in HARDWARE:
-            lvl = g.hw_lvl(h[1])
-            clr = Theme.GREEN if lvl >= h[5] else Theme.AMBER if lvl > 0 else Theme.TEXT_DIM
-            self._right_canvas.itemconfigure(self._hw_items[h[1]],
-                                             text=f'{lvl}/{h[5]}', fill=clr)
+        # ── ALERTS ──
+        if hasattr(self, '_alert_items'):
+            c.itemconfigure(self._alert_items['trace'],
+                            text=f'{tr:.1f}%',
+                            fill=tr_color)
+            sentinel_state = 'ACTIVE' if tr > 80 else 'ANALYZING' if tr > 50 else 'DORMANT'
+            sentinel_color = Theme.RED if tr > 80 else Theme.AMBER if tr > 50 else Theme.GREEN
+            c.itemconfigure(self._alert_items['sentinel'],
+                            text=sentinel_state, fill=sentinel_color)
+            if tr > 50:
+                c.itemconfigure(self._alert_items['probe'],
+                                text='DETECTED', fill=Theme.AMBER)
+            else:
+                c.itemconfigure(self._alert_items['probe'],
+                                text='NONE', fill=Theme.TEXT_DIM)
+            if tr > 70:
+                c.itemconfigure(self._alert_items['counter'],
+                                text='ACTIVE', fill=Theme.RED)
+            else:
+                c.itemconfigure(self._alert_items['counter'],
+                                text='STANDBY', fill=Theme.TEXT_DIM)
 
-        # Sentinel AI
-        sentinel_state = 'ACTIVE' if g.trace_level > 80 else 'ANALYZING' if g.trace_level > 50 else 'IDLE'
+        # ── SENTINEL ──
         if hasattr(self, '_sentinel'):
-            self._sentinel.set_state(sentinel_state)
+            self._sentinel.set_state('ACTIVE' if tr > 80 else 'ANALYZING' if tr > 50 else 'IDLE')
 
-        # Objectives
+        # ── OBJECTIVES ──
         self._update_objectives()
+
+        # ── STATUS BAR ──
+        if '_trace_s' in self._status_labels:
+            self._status_labels['_trace_s'].config(
+                text=f'TRACE: {tr:.0f}%', fg=tr_color)
+        if g.current_server:
+            self._status_labels['_conn'].config(
+                text=f'CONN: {g.current_server["name"][:20]}', fg=Theme.GREEN)
+        else:
+            self._status_labels['_conn'].config(text='DISCONNECTED', fg=Theme.MAGENTA)
+        # Compact indicators
+        if hasattr(self, '_status_indicators'):
+            self._status_indicators['_money'].config(
+                text=f'${g.money:,}', fg=Theme.GREEN if g.money > 0 else Theme.TEXT_DIM)
+            self._status_indicators['_ram'].config(
+                text=f'{random.randint(40, 85)}%', fg=Theme.CYAN)
+            self._status_indicators['_cpu'].config(
+                text=f'{random.randint(10, 60)}%', fg=Theme.CYAN_MID)
+            self._status_indicators['_fw'].config(
+                text='OK', fg=Theme.GREEN if tr < 50 else Theme.AMBER)
+            self._status_indicators['_tools'].config(
+                text=str(g.level + len(g.bounce_chain)), fg=Theme.AMBER)
+            crypto_val = getattr(g, 'crypto_balance', 0)
+            self._status_indicators['_crypto'].config(
+                text=f'${crypto_val}' if crypto_val else '--', fg=Theme.MAGENTA)
 
         # Console glow
         if hasattr(self, 'console'):
@@ -1044,15 +1207,6 @@ class HackerApp:
                 else:
                     parent.config(bg=Theme.BG_SURFACE)
 
-        # Status bar
-        self._status_labels['_trace_s'].config(
-            text=f'TRACE: {tr:.0f}%', fg=tr_color)
-        if g.current_server:
-            self._status_labels['_conn'].config(
-                text=f'CONN: {g.current_server["name"][:20]}', fg=Theme.GREEN)
-        else:
-            self._status_labels['_conn'].config(text='DISCONNECTED', fg=Theme.MAGENTA)
-
         self.trace_alarm()
         self.check_achievements()
         g.check_missions()
@@ -1062,14 +1216,14 @@ class HackerApp:
         hacked = sum(1 for s in g.servers if g.hacked(s))
         mdone = sum(1 for m in g.missions if m['done'])
         objs = [
-            f'▸ Servers: {hacked}/{len(g.servers)}',
-            f'▸ Missions: {mdone}/{len(g.missions) if g.missions else 0}',
+            f'BYPASS GRID FIREWALL',
+            f'DATA EXTRACTION',
+            f'ACCESS NODE ({hacked}/{len(g.servers)})',
         ]
-        if g.current_server:
-            objs.append(f'▸ {g.current_server["name"][:20]}')
         if g.trace_level > 50:
-            objs.append('▸ ⚠ KILL TRACE!')
-        objs += [''] * (4 - len(objs))
+            objs.append('KILL TRACE - URGENT')
+        else:
+            objs.append('EXIT UNTRACED')
         for i, t in enumerate(self._obj_items):
             txt = objs[i] if i < len(objs) else ''
             self._right_canvas.itemconfigure(t, text=txt)

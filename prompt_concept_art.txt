@@ -1,0 +1,100 @@
+================================================================================
+PROMPT PER AI IMAGE GENERATOR (Midjourney / DALL-E / Stable Diffusion)
+"Cyberpunk Hacker Evolution UI Concept Art"
+================================================================================
+
+--- PROMPTO PRINCIPALE (Midjourney v6 / Niji 6) ---
+
+Ultra-detailed 16:9 cinematic UI concept art, front-facing symmetrical
+composition, desktop cyberpunk hacking simulator "Hacker Evolution". Large
+curved ultrawide monitor center frame on dark industrial desk in a neon-lit
+server room with brushed metal, smoked glass, soft foggy depth, matte black
+surfaces. Backlit mechanical keyboard, gaming mouse, visible cables, compact
+hardware boxes, small illuminated devices, side holographic auxiliary
+displays.
+
+Central monitor shows full game interface. Top-left large futuristic cyan
+typography "HACKER EVOLUTION". Top-right navigation bar: START, LOAD, DATA
+LOG, OPTIONS, QUIT.
+
+Main dashboard: large central NETWORK MAP panel titled "NETWORK MAP:
+KYBERNETIX MAIN_GRID". Three-dimensional tactical perspective grid with
+server towers/digital nodes connected by glowing cyan, magenta, amber, lime,
+white lines. Central node intensely illuminated (primary target). Pulse
+effects, route highlights, threat corridors, node markers: neutral, scanned,
+compromised, locked, mission-critical.
+
+Floating terminal windows overlaid on network map: thin glowing borders,
+dark backgrounds, small title bars. Left terminals show exploit code,
+intrusion scripts, packet scans, authentication failures, route diagnostics.
+Right terminals show security telemetry, trace origin, encryption percentage,
+alert state, sentinel probes. Text in cyan, green, white, amber monospace,
+occasional red warning lines.
+
+Right edge vertical HUD stack with framed panels:
+1) SYSTEM STATUS — green/cyan, "SECURE / STABLE / ARMED", progress bar,
+   "Level 3 Bypass", "Node Integrity 82%"
+2) SCANNER — waveform, live sweep, "Scanning Grid D1", "Passive Sweep Active"
+3) ALERTS — red/amber, "TRACE 10.3%", "SENTINEL ACTIVE", "PROBE DETECTED"
+4) OBJECTIVES — "BYPASS GRID FIREWALL", "DATA EXTRACTION", "ACCESS GOV NODE"
+5) Extra panel: STEALTH LEVEL / ACTIVE TOOLS
+
+Sentinel AI indicators: red warning frames, amber scan states, hostile
+security text — "SENTINEL: DORMANT", "SENTINEL: ANALYZING",
+"SENTINEL: ACTIVE", "COUNTERMEASURE DEPLOYED", "TRACE AMPLIFICATION".
+
+Compact indicators across interface: credits, RAM, CPU, personal firewall,
+mission level, exploits/tools, crypto market references, skill tree tabs,
+email/data log access, darknet access, story progression indicators,
+connected server view, player statistics.
+
+Left desk side display: holographic volumetric display with rotating
+wireframe cube/geometric artifact. Right desk side display: circular radar
+threat monitor "THREAT LEVEL: HIGH" / "NETWORK HOSTILITY: ACTIVE".
+
+Cinematic lighting: cyan/magenta neon reflections from room, soft amber
+warning highlights, subtle bloom around active UI elements, realistic
+reflections on desk and monitor bezel. Out-of-focus background server
+racks, cables, glass panels, data center lighting, industrial supports.
+
+Premium typography: bold techno-sans headings, clean narrow labels, crisp
+monospace for technical readouts. Thin borders, glowing separators, crisp
+frames, high contrast. Busy but not chaotic. AAA game UI concept art,
+immersive dark futuristic readable strategic modular highly detailed.
+
+--aspect 16:9 --stylize 400 --v 6.1
+
+================================================================================
+PROMPTO COMPATTO (per SD / DALL-E 3, max 4000 caratteri)
+================================================================================
+
+Cinematic 16:9 UI concept art of "Hacker Evolution" cyberpunk hacking
+simulator. Front symmetrical view, curved ultrawide monitor on dark
+industrial desk, neon-lit server room, matte black surfaces, brushed metal,
+smoked glass. Backlit keyboard, gaming mouse, cables, holographic side
+displays. Main monitor shows game dashboard: title HACKER EVOLUTION in cyan,
+nav bar with START LOAD DATA LOG OPTIONS QUIT. Central network map in
+3D perspective grid with glowing connected server nodes (cyan magenta amber
+lime lines), central target node intensely lit. Floating terminal windows
+overlaid showing exploit code, packet scans, trace data, encryption status in
+monospace cyan/green/amber/red. Right-side HUD panels: SYSTEM STATUS (green
+progress bar), SCANNER (waveform sweep), ALERTS (red TRACE 10% SENTINEL
+ACTIVE), OBJECTIVES list, STEALTH indicator. Sentinel AI threat indicators:
+ANALYZING ACTIVE DORMANT states. Compact indicators for credits, RAM, CPU,
+firewall, mission level, tools, crypto, skills, email. Left desk holographic
+wireframe cube, right desk radar threat monitor. Cinematic cyan/magenta neon
+lighting, bloom, reflections. Out-of-focus server racks background.
+Premium typography, thin glowing borders, tactical modular layout, AAA
+quality.
+
+================================================================================
+NOTE PER L'USO
+================================================================================
+
+- Midjourney: usa il prompt principale con --ar 16:9 --s 400 --v 6.1
+- DALL-E 3: usa il prompt compatto (sotto 4000 char)
+- Stable Diffusion: usa il prompt compatto con model type "epicrealism" o "revAnimated"
+- Se il risultato è troppo "pulito", aggiungi "gritty, dirty lens flare, chromatic aberration"
+- Se mancano elementi UI specifici, usa inpaint/regionale per aggiungerli
+
+================================================================================
